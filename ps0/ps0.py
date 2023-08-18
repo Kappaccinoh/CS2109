@@ -649,15 +649,25 @@ def is_peak(n_cases_increase_avg, n_adj_entries_peak=7):
     # check for peaks within n entries
     removeNan = arr[:, ~np.isnan(arr).any(axis=0)]
     window = np.lib.stride_tricks.sliding_window_view(removeNan, 2*n + 1, axis=1)
-    window = np.argmax(window, axis=1)
-    onesMatrix = np.ones([len(window), len(window[0])])
-    booleanMatrix = window == onesMatrix
+    windowNoNan = np.argmax(window, axis=1)
+    onesMatrix = np.ones([len(windowNoNan), len(window[0])])
+    booleanMatrix = windowNoNan == onesMatrix
 
     # check for significance
-    # thresholdMatrix = 
+    thresholdMatrix = np.nanmean(arr[:], axis=1) * 0.1
+    indivValues = window[:, 1]
+    thresholdMatrix = thresholdMatrix.reshape([len(indivValues),1])
+    thresholdMatrix = np.repeat(thresholdMatrix, len(indivValues[0]), axis=1)
+    booleanMatrixSignificance = thresholdMatrix < indivValues
 
+    finalMatrix = booleanMatrix & booleanMatrixSignificance
 
-
+    # appending before and after values (padding)
+    paddingNumber = int((len(arr[0]) - len(finalMatrix[0])) / 2)
+    missingValues = np.full([len(arr), paddingNumber], False)
+    finalMatrix = np.append(finalMatrix, missingValues, axis=1)
+    finalMatrix = np.append(missingValues, finalMatrix, axis=1)
+    return finalMatrix
 
 
 def test_27():
@@ -738,22 +748,32 @@ if __name__ == "__main__":
     stringency_values = get_stringency_values(df)
     n_cases_top_cumulative = get_n_cases_top_cumulative(df)
 
-    arr = np.array([[np.nan, np.nan, 10, 10, 5, 20, 7, np.nan, np.nan], [np.nan, np.nan, 15, 5, 16, 17, 17, np.nan, np.nan]])
-    n = 1
+    # n_cases_increase_avg = np.array([[np.nan, np.nan, np.nan, 10, 10, 5, 20, 7, np.nan, np.nan, np.nan], [np.nan, np.nan, np.nan, 15, 5, 16, 17, 17, np.nan, np.nan, np.nan]])
+    # n_adj_entries_peak = 1
 
-    # expected = np.array([[False, False, False, False, False, True, False, False, False],
-    #                     [False, False, False, False, False, True, False, False, False]])
+    # arr = n_cases_increase_avg
+    # n = n_adj_entries_peak
 
-    removeNan = arr[:, ~np.isnan(arr).any(axis=0)]
-    # print(removeNan)
-    window = np.lib.stride_tricks.sliding_window_view(removeNan, 2*n + 1, axis=1)
-    # print(window)
-    window = np.argmax(window, axis=1)
-    # print(window)
-    onesMatrix = np.ones([len(window), len(window[0])])
-    # print(onesMatrix)
-    booleanMatrix = window == onesMatrix
-    # print(booleanMatrix)
+    # # check for peaks within n entries
+    # removeNan = arr[:, ~np.isnan(arr).any(axis=0)]
+    # window = np.lib.stride_tricks.sliding_window_view(removeNan, 2*n + 1, axis=1)
+    # windowNoNan = np.argmax(window, axis=1)
+    # onesMatrix = np.ones([len(windowNoNan), len(window[0])])
+    # booleanMatrix = windowNoNan == onesMatrix
 
-    thresholdMatrix = np.nanmean(arr, axis=0)
-    print(thresholdMatrix)
+    # # check for significance
+    # thresholdMatrix = np.nanmean(arr[:], axis=1) * 0.1
+    # indivValues = window[:, 1]
+    # thresholdMatrix = thresholdMatrix.reshape([len(indivValues),1])
+    # thresholdMatrix = np.repeat(thresholdMatrix, len(indivValues[0]), axis=1)
+    # booleanMatrixSignificance = thresholdMatrix < indivValues
+
+    # finalMatrix = booleanMatrix & booleanMatrixSignificance
+    # print(finalMatrix)
+
+    # # appending before and after values (padding)
+    # paddingNumber = (int(len(arr[0])) - int(len(finalMatrix[0]))) / int(2)
+    # missingValues = np.full([len(arr), int(paddingNumber)], False)
+    # finalMatrix = np.append(finalMatrix, missingValues, axis=1)
+    # finalMatrix = np.append(missingValues, finalMatrix, axis=1)
+    # print(finalMatrix)
