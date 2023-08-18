@@ -643,7 +643,14 @@ def is_peak(n_cases_increase_avg, n_adj_entries_peak=7):
     '''
 
     # TODO: add your solution here and remove `raise NotImplementedError`
-    
+    # n_cases_increase_avg - nan num nan
+    # n_adj_entries_peak - window size
+
+    window = np.lib.stride_tricks.sliding_window_view(n_cases_increase_avg, 2*n_adj_entries_peak + 1, axis=1)
+    valuesWindow = np.nanmean(window, axis=1)
+
+
+
 
 
 def test_27():
@@ -723,3 +730,16 @@ if __name__ == "__main__":
     mask_prices = get_mask_prices(healthcare_spending.shape[1])
     stringency_values = get_stringency_values(df)
     n_cases_top_cumulative = get_n_cases_top_cumulative(df)
+
+    arr = np.array([[np.nan, np.nan, 10, 10, 5, 20, 7, np.nan, np.nan], [np.nan, np.nan, 15, 5, 16, 17, 17, np.nan, np.nan]])
+    n = 1
+
+    # expected = np.array([[False, False, False, False, False, True, False, False, False],
+    #                     [False, False, False, False, False, True, False, False, False]])
+
+    removeNan = arr[:, ~np.isnan(arr).any(axis=0)]
+    # print(removeNan)
+    window = np.lib.stride_tricks.sliding_window_view(removeNan, 2*n + 1, axis=1)
+    # print(window)
+    # window = np.max(window)
+    print(window)
