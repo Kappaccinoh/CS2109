@@ -643,11 +643,18 @@ def is_peak(n_cases_increase_avg, n_adj_entries_peak=7):
     '''
 
     # TODO: add your solution here and remove `raise NotImplementedError`
-    # n_cases_increase_avg - nan num nan
-    # n_adj_entries_peak - window size
+    arr = n_cases_increase_avg
+    n = n_adj_entries_peak
 
-    window = np.lib.stride_tricks.sliding_window_view(n_cases_increase_avg, 2*n_adj_entries_peak + 1, axis=1)
-    valuesWindow = np.nanmean(window, axis=1)
+    # check for peaks within n entries
+    removeNan = arr[:, ~np.isnan(arr).any(axis=0)]
+    window = np.lib.stride_tricks.sliding_window_view(removeNan, 2*n + 1, axis=1)
+    window = np.argmax(window, axis=1)
+    onesMatrix = np.ones([len(window), len(window[0])])
+    booleanMatrix = window == onesMatrix
+
+    # check for significance
+    # thresholdMatrix = 
 
 
 
@@ -741,5 +748,12 @@ if __name__ == "__main__":
     # print(removeNan)
     window = np.lib.stride_tricks.sliding_window_view(removeNan, 2*n + 1, axis=1)
     # print(window)
-    # window = np.max(window)
-    print(window)
+    window = np.argmax(window, axis=1)
+    # print(window)
+    onesMatrix = np.ones([len(window), len(window[0])])
+    # print(onesMatrix)
+    booleanMatrix = window == onesMatrix
+    # print(booleanMatrix)
+
+    thresholdMatrix = np.nanmean(arr, axis=0)
+    print(thresholdMatrix)
