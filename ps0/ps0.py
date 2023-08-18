@@ -180,7 +180,6 @@ def getMatrixMinor(A, x, y):
         newMatrix.append(arr)
             
     return newMatrix
-
     
 def getMatrixDeterminant(A):
     # base case
@@ -191,8 +190,6 @@ def getMatrixDeterminant(A):
     for i in range(len(A)):
         det += ((-1) ** i) * (A[0][i]) * getMatrixDeterminant(getMatrixMinor(A, 0, i))
     return det
-
-
 
 # Test case for Task 1.5
 def test_15():
@@ -279,7 +276,11 @@ def compute_death_rate_first_n_days(n, cases_cumulative, deaths_cumulative):
     '''
     
     # TODO: add your solution here and remove `raise NotImplementedError`
-    raise NotImplementedError
+    cCases = cases_cumulative[:, n - 1]
+    cDeaths = deaths_cumulative[:, n - 1]
+
+    dRate = cDeaths / cCases
+    return np.nan_to_num(dRate, copy=True, nan=0.0, posinf=None, neginf=None)
 
 
 # Test case for Task 2.1
@@ -335,7 +336,8 @@ def compute_increase_in_cases(n, cases_cumulative):
     '''
     
     # TODO: add your solution here and remove `raise NotImplementedError`
-    raise NotImplementedError
+    cCases = cases_cumulative[:, 0: n]
+    return np.diff(cCases, 1, -1, 0)
     
 
 # Test case for Task 2.2
@@ -388,7 +390,7 @@ def find_max_increase_in_cases(n_cases_increase):
     '''
     
     # TODO: add your solution here and remove `raise NotImplementedError`
-    raise NotImplementedError
+    return np.amax(n_cases_increase, axis=1)
 
 
 # Test case for Task 2.3
@@ -445,7 +447,9 @@ def compute_n_masks_purchaseable(healthcare_spending, mask_prices):
     '''
     
     # TODO: add your solution here and remove `raise NotImplementedError`
-    raise NotImplementedError
+    numMasks = healthcare_spending / mask_prices
+    flooredMaskValue = np.floor(numMasks)
+    return np.sum(flooredMaskValue, axis=1) * 100
 
 # Test case for Task 2.4
 def test_24():
@@ -503,7 +507,9 @@ def compute_stringency_index(stringency_values):
     '''
     
     # TODO: add your solution here and remove `raise NotImplementedError`
-    raise NotImplementedError
+    stringency_values = stringency_values * np.array([1, 1, 3, 2])
+    return np.sum(stringency_values, axis=2)
+    
 
 # Test case for Task 2.5
 def test_25():
@@ -565,7 +571,15 @@ def average_increase_in_cases(n_cases_increase, n_adj_entries_avg=7):
     '''
     
     # TODO: add your solution here and remove `raise NotImplementedError`
-    raise NotImplementedError
+    window = np.lib.stride_tricks.sliding_window_view(n_cases_increase, 2*n_adj_entries_avg + 1, axis=1)
+    meanValues = np.mean(window, axis=2)
+    meanValues = np.floor(meanValues)
+    missingValues = np.full([len(n_cases_increase), n_adj_entries_avg], np.nan)
+
+    meanValues = np.append(meanValues, missingValues, axis=1)
+    meanValues = np.append(missingValues, meanValues, axis=1)
+    return meanValues
+
 
 # Test case for Task 2.6
 def test_26():
@@ -629,7 +643,7 @@ def is_peak(n_cases_increase_avg, n_adj_entries_peak=7):
     '''
 
     # TODO: add your solution here and remove `raise NotImplementedError`
-    raise NotImplementedError
+    
 
 
 def test_27():
@@ -709,6 +723,3 @@ if __name__ == "__main__":
     mask_prices = get_mask_prices(healthcare_spending.shape[1])
     stringency_values = get_stringency_values(df)
     n_cases_top_cumulative = get_n_cases_top_cumulative(df)
-
-    print(invert_matrix([[1, 0, 0], [0, 1, 0], [0, 0, 0]]))
-    
