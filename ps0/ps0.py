@@ -146,51 +146,122 @@ def invert_matrix(A):
         return False
     
     # TODO: add your solution here and remove `raise NotImplementedError`
-    # Base Case 
-    if len(A) == 2:
-        newMatrix = []
-        newMatrix[0][0] = A[1][1]
-        newMatrix[0][1] = -1 * A[1][0]
-        newMatrix[1][0] = -1 * A[0][1]
-        newMatrix[1][1] = A[0][0]
-        return mult_scalar(A, 1 / getMatrixDeterminant(A))
-    
-    # Matrix of Cofactors = Matrix of Minors + Checkerboard Pattern Overlay
-    cofactorMatrix = []
+    A_copy = []
     for i in range(len(A)):
-        arr = []
+        A_col = []
         for j in range(len(A)):
-            arr.append(((-1) ** (i + j)) * (getMatrixDeterminant(getMatrixMinor(A, i, j))))
-        cofactorMatrix.append(arr)
-    
-    cofactorMatrix = transpose_matrix(cofactorMatrix)
-    if getMatrixDeterminant(A) == 0:
-        return False
-    return mult_scalar(cofactorMatrix, 1 / getMatrixDeterminant(A))
+            A_col.append(A[i][j])
+        A_copy.append(A_col)
 
-def getMatrixMinor(A, x, y):
+    # Augment Identity Matrix to Matrix
+    length = len(A_copy)
+    for i in range(length):
+        for j in range(length):
+            if i == j:
+                A_copy[i].append(1)
+            else:
+                A_copy[i].append(0)
+
+    # Gaussian Elimination
+    # Swapping
+    for i in range(length):
+        # print(A_copy)
+        flag = False
+        for row in range(i, length):
+            if A_copy[row][i] != 0:
+                original = A_copy[i]
+                A_copy[i] = A_copy[row]
+                A_copy[row] = original
+                flag = True # swap occured
+                break
+        if not flag:
+            return False
+        
+
+        if A_copy[i][i] != 1:
+            # Divide the whole remaining row by the coefficient of A[i][i]
+            coeff = A_copy[i][i]
+            for j in range(i, length * 2):
+                A_copy[i][j] = A_copy[i][j] / coeff
+        
+        # print(A_copy)
+
+        # Adding Multiples to each row
+        for subrow in range(length):
+            multiplier = -1 * A_copy[subrow][i]
+            for subcol in range(i, 2 * length):
+                if i == subrow:
+                    continue
+                else:
+                    A_copy[subrow][subcol] += multiplier * A_copy[i][subcol]
+
+        # print("immediate")
+        # print(A_copy)
+
+    # Return New Identity Matrix Portion
     newMatrix = []
-    for i in range(len(A)):
-        if i == x:
-            continue
-        arr = []
-        for j in range (len(A[0])):
-            if j == y:
-                continue
-            arr.append(A[i][j])
-        newMatrix.append(arr)
-            
+    for row in range(length):
+        newCol = []
+        for col in range(length):
+            newCol.append(A_copy[row][col + length])
+        newMatrix.append(newCol)
+
     return newMatrix
+
+# Co-Factor Version
+# def invert_matrix(A):
+#     """
+#     Returns the inverse of matrix A, if it exists; otherwise, returns False
+#     """
+#     if len(A[0]) != len(A):
+#         return False
     
-def getMatrixDeterminant(A):
-    # base case
-    if len(A) == 2:
-        return A[0][0] * A[1][1] - A[0][1] * A[1][0]
+#     # TODO: add your solution here and remove `raise NotImplementedError`
+#     # Base Case 
+#     if len(A) == 2:
+#         newMatrix = []
+#         newMatrix[0][0] = A[1][1]
+#         newMatrix[0][1] = -1 * A[1][0]
+#         newMatrix[1][0] = -1 * A[0][1]
+#         newMatrix[1][1] = A[0][0]
+#         return mult_scalar(A, 1 / getMatrixDeterminant(A))
     
-    det = 0
-    for i in range(len(A)):
-        det += ((-1) ** i) * (A[0][i]) * getMatrixDeterminant(getMatrixMinor(A, 0, i))
-    return det
+#     # Matrix of Cofactors = Matrix of Minors + Checkerboard Pattern Overlay
+#     cofactorMatrix = []
+#     for i in range(len(A)):
+#         arr = []
+#         for j in range(len(A)):
+#             arr.append(((-1) ** (i + j)) * (getMatrixDeterminant(getMatrixMinor(A, i, j))))
+#         cofactorMatrix.append(arr)
+    
+#     cofactorMatrix = transpose_matrix(cofactorMatrix)
+#     if getMatrixDeterminant(A) == 0:
+#         return False
+#     return mult_scalar(cofactorMatrix, 1 / getMatrixDeterminant(A))
+
+# def getMatrixMinor(A, x, y):
+#     newMatrix = []
+#     for i in range(len(A)):
+#         if i == x:
+#             continue
+#         arr = []
+#         for j in range (len(A[0])):
+#             if j == y:
+#                 continue
+#             arr.append(A[i][j])
+#         newMatrix.append(arr)
+            
+#     return newMatrix
+    
+# def getMatrixDeterminant(A):
+#     # base case
+#     if len(A) == 2:
+#         return A[0][0] * A[1][1] - A[0][1] * A[1][0]
+    
+#     det = 0
+#     for i in range(len(A)):
+#         det += ((-1) ** i) * (A[0][i]) * getMatrixDeterminant(getMatrixMinor(A, 0, i))
+#     return det
 
 # Test case for Task 1.5
 def test_15():
@@ -761,12 +832,9 @@ if __name__ == "__main__":
     stringency_values = get_stringency_values(df)
     n_cases_top_cumulative = get_n_cases_top_cumulative(df)
 
-    # n_cases_increase_avg = np.array([[np.nan, np.nan, 10, 10, 5, 20, 7, np.nan, np.nan], [np.nan, np.nan, 15, 5, 16, 17, 17, np.nan, np.nan]])
-    # n_adj_entries_peak = 1
+    # A = [[1, 0 ,0], [0, 1, 0], [0, -4, 1]]
+    # print(invert_matrix(A))
 
-    # arr = n_cases_increase_avg
-    # n = n_adj_entries_peak
-
-    # CS 2109 Chat Help
-    # cases_top_cumulative = get_n_cases_top_cumulative(df)
-    # is_peak(average_increase_in_cases(compute_increase_in_cases(cases_top_cumulative.shape[1], cases_top_cumulative)))
+    print(invert_matrix([[0, 3, 2], [0, 0, 1], [1, 5, 3]]))
+    print("answer")
+    print([[-1.6666666666666667, 0.3333333333333333, 1], [0.3333333333333333, -0.6666666666666666, 0], [0, 1, 0]])
