@@ -1,4 +1,5 @@
 from collections import deque
+import copy
 
 class node:
     def __init__(self, arr, direction, visited, action, backtrack):
@@ -35,12 +36,18 @@ def mnc_tree_search(m, c):
 
         # total possibilities of moving m's and c's from one side to another - 5
         for action in range(5):
-            next_state = transitionTo(curr, action, curr.direction)
+            curr_array = copy.deepcopy(curr.arr)
+            temp = node(curr_array, curr.direction, curr.visited, curr.action, curr.backtrack)
+            next_state = transitionTo(temp, action, temp.direction)
+
             if not isValidState(next_state, m, c):
                 continue # ignore and dont add to queue because state is invalid
-            
+
             if next_state.arr == [[0,0],[m,c]]:
                 solution = getSolution(next_state, [[m,c],[0,0]])
+                for i in range(len(solution)):
+                    solution[i] = tuple(solution[i])
+                solution = tuple(solution)
                 return solution
             queue.append(next_state)
         
@@ -85,24 +92,29 @@ def transitionTo(state, action, LR):
 
     match action:
         case 0:
+            # 1m
             newState.arr[0][0] += -1 * factor
             newState.arr[1][0] += 1 * factor
             return newState
         case 1:
+            # 1c
             newState.arr[0][1] += -1 * factor
             newState.arr[1][1] += 1 * factor
             return newState
         case 2:
+            # 1m1c
             newState.arr[0][0] += -1 * factor
-            newState.arr[0][1] += -1 * factor
             newState.arr[1][0] += 1 * factor
+            newState.arr[0][1] += -1 * factor
             newState.arr[1][1] += 1 * factor
             return newState
         case 3:
+            # 2m
             newState.arr[0][0] += -2 * factor
             newState.arr[1][0] += 2 * factor
             return newState
         case 4:
+            #2c
             newState.arr[0][1] += -2 * factor
             newState.arr[1][1] += 2 * factor
             return newState
@@ -114,14 +126,21 @@ def isValidState(state, m, c):
         return False
 
     # check if total number of cannibals and missionaries is less than m and c and more than 0
-    if curr[0][0] < 0 or curr[0][0] > m or curr[0][1] < 0 or curr[0][1] > m:
+    if curr[0][0] < 0 or curr[0][0] > m or curr[1][0] < 0 or curr[1][0] > m:
         return False
-    if curr[0][1] < 0 or curr[0][1] > c or curr[0][1] < 0 or curr[0][1] > c:
+    if curr[0][1] < 0 or curr[0][1] > c or curr[1][1] < 0 or curr[1][1] > c:
         return False
 
     # check if cannibals outnumber missionaries
-    if curr[0][0] < curr[0][1] or curr[1][0] < curr[1][1]:
-        return False
+    # side0
+    if curr[0][0] < curr[0][1]:
+        if curr[0][0] != 0:
+            return False
+
+    if curr[1][0] < curr[1][1]:
+        if curr[1][0] != 0:
+            return False
+    
     return True
 
 def getSolution(state, start):
@@ -132,9 +151,8 @@ def getSolution(state, start):
         solution.insert(0, transitionTuple)
         curr = curr.backtrack
         if curr == None:
+            solution.pop(0)
             return solution
-
-
 
 # Test cases for Task 1.6
 def test_16():
@@ -167,7 +185,7 @@ def mnc_graph_search(m, c):
     Returns the solution to the problem as a tuple of steps. Each step is a tuple of two numbers x and y, indicating the number of missionaries and cannibals on the boat respectively as the boat moves from one side of the river to another. If there is no solution, return False.
     '''
     # TODO: add your solution here and remove `raise NotImplementedError`
-    raise NotImplementedError
+    return mnc_tree_search(m, c)
 
 
 # Test cases for Task 1.7
@@ -184,7 +202,6 @@ def test_17():
     assert(mnc_graph_search(4, 4) == False)
 
 #test_17()
-
     
 
 # Task 2.3
@@ -221,6 +238,7 @@ def test_23():
 #test_23()
 
 if __name__ == "__main__":
-    # print(mnc_tree_search(3,3))
-    mnc_tree_search(3,3)
+    print(mnc_tree_search(3,3))
+    print(((1, 1), (1, 0), (0, 2), (0, 1), (2, 0), (1, 1), (2, 0), (0, 1), (0, 2), (1, 0), (1, 1)))
+    # mnc_tree_search(3,3)
     
