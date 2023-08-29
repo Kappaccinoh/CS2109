@@ -45,8 +45,6 @@ def mnc_tree_search(m, c):
 
             if next_state.arr == [[0,0],[m,c]]:
                 solution = getSolution(next_state, [[m,c],[0,0]])
-                for i in range(len(solution)):
-                    solution[i] = tuple(solution[i])
                 solution = tuple(solution)
                 return solution
             queue.append(next_state)
@@ -66,15 +64,15 @@ def mnc_tree_search(m, c):
 def getTransition(action):
     match action:
         case 0:
-            return [1,0]
+            return (1,0)
         case 1:
-            return [0,1]
+            return (0,1)
         case 2:
-            return [1,1]
+            return (1,1)
         case 3:
-            return [2,0]
+            return (2,0)
         case 4:
-            return [0,2]
+            return (0,2)
 
 def transitionTo(state, action, LR):
     newState = node(state.arr, state.direction, state.visited, action, state.backtrack)
@@ -133,13 +131,11 @@ def isValidState(state, m, c):
 
     # check if cannibals outnumber missionaries
     # side0
-    if curr[0][0] < curr[0][1]:
-        if curr[0][0] != 0:
-            return False
+    if curr[0][0] < curr[0][1] and curr[0][0] != 0:
+        return False
 
-    if curr[1][0] < curr[1][1]:
-        if curr[1][0] != 0:
-            return False
+    if curr[1][0] < curr[1][1] and curr[1][0] != 0:
+        return False
     
     return True
 
