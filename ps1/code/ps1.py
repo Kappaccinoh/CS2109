@@ -1,10 +1,11 @@
 from collections import deque
 
 class node:
-    def __init__(self, arr, direction, visited, backtrack):
+    def __init__(self, arr, direction, visited, action, backtrack):
         self.arr = arr
         self.direction = direction # boolean True for left, False for right
         self.visited = visited # boolean
+        self.action = action
         self.backtrack = backtrack
 
 # Task 1.6
@@ -27,7 +28,7 @@ def mnc_tree_search(m, c):
     # start = [[m,c],[0,0]]
     # goal = [[0,0],[m,c]]
     queue = deque()
-    root = node([[m,c],[0,0]], True, False, -1)
+    root = node([[m,c],[0,0]], True, False, -1, None)
     queue.append(root)
     while len(queue) != 0:
         curr = queue.popleft()
@@ -37,6 +38,7 @@ def mnc_tree_search(m, c):
             next_state = transitionTo(curr, action, curr.direction)
             if not isValidState(next_state, m, c):
                 continue # ignore and dont add to queue because state is invalid
+            
             if next_state.arr == [[0,0],[m,c]]:
                 solution = getSolution(next_state, [[m,c],[0,0]])
                 return solution
@@ -57,20 +59,21 @@ def mnc_tree_search(m, c):
 def getTransition(action):
     match action:
         case 0:
-            return (1,0)
+            return [1,0]
         case 1:
-            return (0,1)
+            return [0,1]
         case 2:
-            return (1,1)
+            return [1,1]
         case 3:
-            return (2,0)
+            return [2,0]
         case 4:
-            return (0,2)
+            return [0,2]
 
 def transitionTo(state, action, LR):
-    newState = node(state.arr, state.direction, state.visited, state.backtrack)
+    newState = node(state.arr, state.direction, state.visited, action, state.backtrack)
     newState.direction = not newState.direction
-    newState.backtrack = action
+    newState.action = action
+    newState.backtrack = state
 
     # LR is boolean, if True boat needs to go right, else left
     # "factor" determines which direction the boat is travelling in
@@ -122,16 +125,14 @@ def isValidState(state, m, c):
     return True
 
 def getSolution(state, start):
-    solution = ()
-
+    solution = []
     curr = state
     while (curr.arr != start):
-        print(curr.arr)
-        transitionTuple = getTransition(curr.backtrack)
-        solution = transitionTuple + solution
-        curr = transitionTo(curr, curr.backtrack, not curr.direction)
-    return solution
-
+        transitionTuple = getTransition(curr.action)
+        solution.insert(0, transitionTuple)
+        curr = curr.backtrack
+        if curr == None:
+            return solution
 
 
 
@@ -220,5 +221,6 @@ def test_23():
 #test_23()
 
 if __name__ == "__main__":
-    print(mnc_tree_search(3,3))
+    # print(mnc_tree_search(3,3))
+    mnc_tree_search(3,3)
     
