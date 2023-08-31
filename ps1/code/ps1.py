@@ -208,8 +208,8 @@ def mnc_graph_search(m, c):
             if not isValidStateGraph(next_state, m, c):
                 continue # ignore and dont add to queue because state is invalid
 
-            # if next_state.arr in visited:
-            #     continue
+            if next_state.arr in visited:
+                continue
 
             # print("after")
             # print(next_state.arr)
@@ -371,7 +371,7 @@ def test_23():
 #test_23()
 
 if __name__ == "__main__":
-    print(mnc_graph_search(3,3))
+    print(mnc_graph_search(4,4))
     print(((1, 1), (1, 0), (0, 2), (0, 1), (2, 0), (1, 1), (2, 0), (0, 1), (0, 2), (1, 0), (1, 1)))
     
 
