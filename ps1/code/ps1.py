@@ -162,9 +162,8 @@ def test_16():
 #test_16()
 
 class nodeForGraph:
-    def __init__(self, arr, direction, action = -1, backtrack = None):
+    def __init__(self, arr, action = -1, backtrack = None):
         self.arr = arr
-        self.direction = direction
         self.action = action
         self.backtrack = backtrack
 
@@ -190,7 +189,7 @@ def mnc_graph_search(m, c):
     # goal = (0,0,m,c)
     visited = set()
     queue = deque()
-    root = nodeForGraph((m,c,0,0,True), True, -1, None)
+    root = nodeForGraph((m,c,0,0,True), -1, None)
     queue.append(root)
     while len(queue) != 0:
         curr = queue.popleft()
@@ -199,7 +198,7 @@ def mnc_graph_search(m, c):
         # total possibilities of moving m's and c's from one side to another - 5
         for action in range(5):
             curr_array = copy.deepcopy(curr.arr)
-            temp = nodeForGraph(curr_array, curr.direction, curr.action, curr)
+            temp = nodeForGraph(curr_array, curr.action, curr)
             next_state = transitionToGraph(temp, action, temp.arr[4])
 
             # print("before")
@@ -282,8 +281,7 @@ def transitionToGraph(state, action, LR):
             lc = state.arr[1] + -2 * factor
             rc = state.arr[3] + 2 * factor
     
-    newState = nodeForGraph((lm, lc, rm, rc, not LR), state.direction, action, state.backtrack)
-    newState.direction = not newState.direction
+    newState = nodeForGraph((lm, lc, rm, rc, not LR), action, state.backtrack)
 
     return newState
 
@@ -371,7 +369,7 @@ def test_23():
 #test_23()
 
 if __name__ == "__main__":
-    print(mnc_graph_search(4,4))
+    print(mnc_graph_search(6,5))
     print(((1, 1), (1, 0), (0, 2), (0, 1), (2, 0), (1, 1), (2, 0), (0, 1), (0, 2), (1, 0), (1, 1)))
     
 
