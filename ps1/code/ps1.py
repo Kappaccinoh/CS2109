@@ -30,7 +30,7 @@ def mnc_tree_search(m, c):
     # start = [[m,c],[0,0]]
     # goal = [[0,0],[m,c]]
     queue = deque()
-    root = node([[m,c],[0,0]], -1, None)
+    root = node([[m,c],[0,0]], True, -1, None)
     queue.append(root)
     while len(queue) != 0:
         curr = queue.popleft()
@@ -41,20 +41,13 @@ def mnc_tree_search(m, c):
             temp = node(curr_array, curr.direction, curr.action, curr.backtrack)
             next_state = transitionTo(temp, action, temp.direction)
 
-            print("before")
-            print(next_state.arr)
-
             if not isValidState(next_state, m, c):
                 continue # ignore and dont add to queue because state is invalid
-
-            print("after")
-            print(next_state.arr)
 
             if next_state.arr == [[0,0],[m,c]]:
                 solution = getSolution(next_state, [[m,c],[0,0]])
                 solution = tuple(solution)
                 return solution
-            
             queue.append(next_state)
         
     return False
@@ -145,6 +138,7 @@ def isValidState(state, m, c):
 def getSolution(state, start):
     solution = []
     curr = state
+    print(curr.arr)
     while (curr.arr != start):
         transitionTuple = getTransition(curr.action)
         solution.insert(0, transitionTuple)
@@ -171,7 +165,7 @@ def test_16():
 class nodeForGraph:
     def __init__(self, arr, direction, action = -1, backtrack = None):
         self.arr = arr
-        self.direction = direction # boolean True for left, False for right
+        self.direction = direction
         self.action = action
         self.backtrack = backtrack
 
@@ -196,18 +190,19 @@ def mnc_graph_search(m, c):
     # start = (m,c,0,0)
     # goal = (0,0,m,c)
     visited = set()
-
     queue = deque()
     root = nodeForGraph((m,c,0,0,True), True, -1, None)
+    print(root.backtrack)
     queue.append(root)
     while len(queue) != 0:
         curr = queue.popleft()
+
 
         # total possibilities of moving m's and c's from one side to another - 5
         for action in range(5):
             curr_array = copy.deepcopy(curr.arr)
             temp = nodeForGraph(curr_array, curr.direction, curr.action, curr.backtrack)
-            next_state = transitionToGraph(temp, action, temp.direction)
+            next_state = transitionToGraph(temp, action, temp.arr[4])
 
             # print("before")
             # print(next_state.arr)
@@ -215,21 +210,20 @@ def mnc_graph_search(m, c):
             if not isValidStateGraph(next_state, m, c):
                 continue # ignore and dont add to queue because state is invalid
 
-            if next_state.arr in visited:
-                continue
+            # if next_state.arr in visited:
+            #     continue
 
             # print("after")
             # print(next_state.arr)
 
             if next_state.arr == (0, 0, m, c, False):
                 solution = getSolutionGraph(next_state, (m, c, 0, 0, True))
-                # solution = tuple(solution)
+                solution = tuple(solution)
                 return solution
             queue.append(next_state)
 
         visited.add(curr.arr)
         
-    
     return False
 
 # I define 5 possible choices that the boat can choose from when moving from one side to another
@@ -290,7 +284,7 @@ def transitionToGraph(state, action, LR):
             lc = state.arr[1] + -2 * factor
             rc = state.arr[3] + 2 * factor
     
-    newState = nodeForGraph((lm, lc, rm, rc, not state.direction), state.direction, action, state.backtrack)
+    newState = nodeForGraph((lm, lc, rm, rc, not LR), state.direction, action, state.backtrack)
     newState.direction = not newState.direction
     newState.action = action
     newState.backtrack = state
@@ -319,13 +313,15 @@ def isValidStateGraph(state, m, c):
 def getSolutionGraph(state, start):
     solution = []
     curr = state
-    while (curr.arr != start):
 
+    print(curr.arr)
+    while (curr.arr != start):
         transitionTuple = getTransitionGraph(curr.action)
-        solution.append(transitionTuple)
+        solution.insert(0, transitionTuple)
         curr = curr.backtrack
 
-        if curr.arr == start:
+        if curr == None:
+            solution.pop(0)
             return solution
 
 # Test cases for Task 1.7
@@ -378,7 +374,7 @@ def test_23():
 #test_23()
 
 if __name__ == "__main__":
-    print(mnc_graph_search(3,3))
+    print(mnc_tree_search(2,2))
     # print(((1, 1), (1, 0), (0, 2), (0, 1), (2, 0), (1, 1), (2, 0), (0, 1), (0, 2), (1, 0), (1, 1)))
     
 
