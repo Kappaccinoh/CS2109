@@ -138,7 +138,6 @@ def isValidState(state, m, c):
 def getSolution(state, start):
     solution = []
     curr = state
-    print(curr.arr)
     while (curr.arr != start):
         transitionTuple = getTransition(curr.action)
         solution.insert(0, transitionTuple)
@@ -192,7 +191,6 @@ def mnc_graph_search(m, c):
     visited = set()
     queue = deque()
     root = nodeForGraph((m,c,0,0,True), True, -1, None)
-    print(root.backtrack)
     queue.append(root)
     while len(queue) != 0:
         curr = queue.popleft()
@@ -201,7 +199,7 @@ def mnc_graph_search(m, c):
         # total possibilities of moving m's and c's from one side to another - 5
         for action in range(5):
             curr_array = copy.deepcopy(curr.arr)
-            temp = nodeForGraph(curr_array, curr.direction, curr.action, curr.backtrack)
+            temp = nodeForGraph(curr_array, curr.direction, curr.action, curr)
             next_state = transitionToGraph(temp, action, temp.arr[4])
 
             # print("before")
@@ -286,8 +284,6 @@ def transitionToGraph(state, action, LR):
     
     newState = nodeForGraph((lm, lc, rm, rc, not LR), state.direction, action, state.backtrack)
     newState.direction = not newState.direction
-    newState.action = action
-    newState.backtrack = state
 
     return newState
 
@@ -314,15 +310,16 @@ def getSolutionGraph(state, start):
     solution = []
     curr = state
 
-    print(curr.arr)
     while (curr.arr != start):
         transitionTuple = getTransitionGraph(curr.action)
+        
         solution.insert(0, transitionTuple)
         curr = curr.backtrack
 
-        if curr == None:
-            solution.pop(0)
-            return solution
+        # if curr == None:
+        #     solution.pop(0)
+        #     return solution
+    return solution
 
 # Test cases for Task 1.7
 def test_17():
@@ -374,8 +371,8 @@ def test_23():
 #test_23()
 
 if __name__ == "__main__":
-    print(mnc_tree_search(2,2))
-    # print(((1, 1), (1, 0), (0, 2), (0, 1), (2, 0), (1, 1), (2, 0), (0, 1), (0, 2), (1, 0), (1, 1)))
+    print(mnc_graph_search(3,3))
+    print(((1, 1), (1, 0), (0, 2), (0, 1), (2, 0), (1, 1), (2, 0), (0, 1), (0, 2), (1, 0), (1, 1)))
     
 
 
