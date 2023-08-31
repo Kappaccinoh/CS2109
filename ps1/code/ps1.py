@@ -1,5 +1,6 @@
 from collections import deque
 import copy
+import time
 
 class node:
     def __init__(self, arr, direction, action = -1, backtrack = None):
@@ -29,6 +30,8 @@ def mnc_tree_search(m, c):
 
     # start = [[m,c],[0,0]]
     # goal = [[0,0],[m,c]]
+    start_time = time.time()
+
     queue = deque()
     root = node([[m,c],[0,0]], True, -1, None)
     queue.append(root)
@@ -47,9 +50,11 @@ def mnc_tree_search(m, c):
             if next_state.arr == [[0,0],[m,c]]:
                 solution = getSolution(next_state, [[m,c],[0,0]])
                 solution = tuple(solution)
+                print("My program took", time.time() - start_time, "to run")
                 return solution
             queue.append(next_state)
-        
+
+    print("My program took", time.time() - start_time, "to run")
     return False
 
 
@@ -187,6 +192,8 @@ def mnc_graph_search(m, c):
 
     # start = (m,c,0,0)
     # goal = (0,0,m,c)
+    start_time = time.time()
+
     visited = set()
     queue = deque()
     root = nodeForGraph((m,c,0,0,True), -1, None)
@@ -216,11 +223,13 @@ def mnc_graph_search(m, c):
             if next_state.arr == (0, 0, m, c, False):
                 solution = getSolutionGraph(next_state, (m, c, 0, 0, True))
                 solution = tuple(solution)
+                print("My program took", time.time() - start_time, "to run")
                 return solution
             queue.append(next_state)
 
         visited.add(curr.arr)
-        
+
+    print("My program took", time.time() - start_time, "to run")
     return False
 
 # I define 5 possible choices that the boat can choose from when moving from one side to another
@@ -370,9 +379,7 @@ def test_23():
 
 if __name__ == "__main__":
     print(mnc_graph_search(6,5))
-    print(((1, 1), (1, 0), (0, 2), (0, 1), (2, 0), (1, 1), (2, 0), (0, 1), (0, 2), (1, 0), (1, 1)))
-    
-
+    # print(((1, 1), (1, 0), (0, 2), (0, 1), (2, 0), (1, 1), (2, 0), (0, 1), (0, 2), (1, 0), (1, 1)))
 
 
 """
