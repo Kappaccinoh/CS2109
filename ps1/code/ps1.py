@@ -344,6 +344,13 @@ def test_17():
 #test_17()
     
 
+class pitcherNode:
+    def __init__(self, capacityTuple, currentTuple, backtrack = None, action = None):
+        self.capacityTuple = capacityTuple
+        self.currentTuple = currentTuple
+        self.backtrack = backtrack
+        self.action = action
+
 # Task 2.3
 def pitcher_search(p1,p2,p3,a):
     '''
@@ -363,7 +370,248 @@ def pitcher_search(p1,p2,p3,a):
     If there is no solution, return False.
     '''
     # TODO: add your solution here and remove `raise NotImplementedError`
-    raise NotImplementedError
+
+    # Memoized BFS Approach
+    visited = set()
+    queue = deque()
+    root = pitcherNode((p1,p2,p3), (0,0,0))
+    queue.append(root)
+    while len(queue) != 0:
+        curr = queue.popleft()
+
+        print(len(queue))
+
+        allChildren = possibleActions(curr)
+
+        for child in allChildren:
+            if not isValid(child):
+                continue # ignore and dont add to queue because state is invalid
+
+            if child.currentTuple in visited:
+                continue
+
+            if isGoal(child, a):
+                sol = tuple(getSolution(child, a, (0, 0, 0)))
+                # print(sol)
+                return sol
+            
+            queue.append(child)
+
+        visited.add((curr.currentTuple[0],
+                    curr.currentTuple[1],
+                    curr.currentTuple[2]))    
+
+    return False
+
+def flatten(l):
+    return [item for sublist in l for item in sublist]
+
+def possibleActions(curr):
+    allPossibleActions = []
+
+    allPossibleActions.append(filljugs(curr))
+    allPossibleActions.append(emptyjugs(curr))
+    allPossibleActions.append(transferwater(curr))
+
+    allPossibleActions = flatten(allPossibleActions)
+
+    return allPossibleActions
+
+
+def isValid(curr):
+    if 0 <= curr.currentTuple[0] <= curr.capacityTuple[0]:
+        if 0 <= curr.currentTuple[1] <= curr.capacityTuple[1]:
+            if 0 <= curr.currentTuple[2] <= curr.capacityTuple[2]:
+                return True
+    return False
+
+def filljugs(curr):
+    return [pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.capacityTuple[0],
+                        curr.currentTuple[1],
+                        curr.currentTuple[2]), curr, (0,0,0)),
+                        
+            pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.currentTuple[0],
+                        curr.capacityTuple[1],
+                        curr.currentTuple[2]), curr, (0,1,0)),
+
+            pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.currentTuple[1],
+                        curr.currentTuple[1],
+                        curr.capacityTuple[2]), curr, (0,2,0))
+            ]
+
+def emptyjugs(curr):
+    return [pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (0,
+                        curr.currentTuple[1],
+                        curr.currentTuple[2]), curr, (1,0,0)),
+                        
+            pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.currentTuple[0],
+                        0,
+                        curr.currentTuple[2]), curr, (1,1,0)),
+
+            pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.currentTuple[0],
+                        curr.currentTuple[1],
+                        0), curr, (1,2,0))
+            ]
+
+def transferwater(curr):
+    final = []
+    
+    # a transfer b
+    missing = curr.capacityTuple[1] - curr.currentTuple[1]
+    if missing > curr.capacityTuple[0]:
+        final.append(pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (0,
+                        curr.currentTuple[0] + curr.currentTuple[1],
+                        curr.currentTuple[2]), curr, (2,0,0)))
+    else:
+        final.append(pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.currentTuple[0] - missing,
+                        curr.capacityTuple[1],
+                        curr.currentTuple[2]), curr, (2,0,0)))
+    
+    # b transfer c
+    missing = curr.capacityTuple[2] - curr.currentTuple[2]
+    if missing > curr.capacityTuple[1]:
+        final.append(pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.currentTuple[0],
+                        0,
+                        curr.currentTuple[1] + curr.currentTuple[2]), curr, (2,0,1)))
+    else:
+        final.append(pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.currentTuple[0] ,
+                        curr.currentTuple[1] - missing,
+                        curr.capacityTuple[2]), curr, (2,0,1)))
+
+    # c transfer a
+    missing = curr.capacityTuple[0] - curr.currentTuple[0]
+    if missing > curr.capacityTuple[2]:
+        final.append(pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.currentTuple[0] + currentTuple[2],
+                        curr.currentTuple[1],
+                        0), curr, (2,0,2)))
+    else:
+        final.append(pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.capacityTuple[0],
+                        curr.currentTuple[1],
+                        curr.currentTuple[2] - missing), curr, (2,0,2)))
+
+    # a transfer c
+    missing = curr.capacityTuple[2] - curr.currentTuple[2]
+    if missing > curr.capacityTuple[0]:
+        final.append(pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (0,
+                        curr.currentTuple[1],
+                        curr.currentTuple[0] + curr.currentTuple[2]), curr, (2,0,3)))
+    else:
+        final.append(pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.currentTuple[0] - missing,
+                        curr.currentTuple[1],
+                        curr.capacityTuple[2]), curr, (2,0,3)))
+
+    # c transfer b
+    missing = curr.capacityTuple[1] - curr.currentTuple[1]
+    if missing > curr.capacityTuple[2]:
+        final.append(pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.currentTuple[0],
+                        curr.currentTuple[1] + currentTuple[2],
+                        0), curr, (2,0,4)))
+    else:
+        final.append(pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.currentTuple[0],
+                        curr.capacityTuple[1],
+                        curr.currentTuple[2] - missing), curr, (2,0,4)))
+
+    # b transfer a
+    missing = curr.capacityTuple[0] - curr.currentTuple[0]
+    if missing > curr.capacityTuple[1]:
+        final.append(pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.currentTuple[0] + curr.currentTuple[1],
+                        0,
+                        curr.currentTuple[2]), curr, (2,0,5)))
+    else:
+        final.append(pitcherNode((curr.capacityTuple[0],
+                        curr.capacityTuple[1],
+                        curr.capacityTuple[2]),
+                        (curr.capacityTuple[0],
+                        curr.currentTuple[1] - missing,
+                        curr.currentTuple[2]), curr, (2,0,5)))
+
+    return final
+
+def isGoal(curr, a):
+    if curr.currentTuple[0] == a or curr.currentTuple[1] == a or curr.currentTuple[2] == a:
+        return True
+    return False
+
+# 0 - Move (Fill, Empty, Transfer)
+# 1 - Jugs (1,2,3)
+# 2 - Direction (1-2, 2-3, 3-1, 1-3, 3-2, 2-1)
+
+def getAction(curr):
+    string = ""
+    move = curr.action[0]
+    jug = curr.action[1]
+    direction = curr.action[2]
+
+    moves = ("Fill", "Empty")
+    jugs = ("P1", "P2", "P3")
+    directions = ("P1=>P2", "P2=>P3", "P3=>P1", "P1=>P3", "P3=>P2", "P2=>P1")
+
+    if move == 0:
+        string = moves[0] + " " + jugs[jug]
+    elif move == 1:
+        string = moves[1] + " " + jugs[jug]
+    else:
+        string = directions[direction]
+
+    return string
+
+def getSolution(curr, a, initial):
+    solution = []
+    while(curr.currentTuple != initial):
+        solution.insert(0, getAction(curr))
+        curr = curr.backtrack
+    return solution
 
 # Test cases for Task 2.3
 def test_23():
