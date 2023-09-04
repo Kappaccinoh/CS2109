@@ -267,6 +267,24 @@ def transition(route: List[int]):
     new_routes = []
     
     """ YOUR CODE HERE """
+    # dont generate all possible combinations, mutual swap between all neighbouring elements
+    i = 0
+    j = 1
+    while(j < len(route)):
+        tempRoute = copy.deepcopy(route)
+        temp = route[i]
+        route[i] = route[j]
+        route[j] = temp
+        new_routes.append(tempRoute)
+        i += 1
+        j += 1
+    
+    j += -1
+    tempRoute = copy.deepcopy(route)
+    temp = route[0]
+    route[0] = route[j]
+    route[j] = temp
+    new_routes.append(tempRoute)
     
     """ END YOUR CODE HERE """
 
