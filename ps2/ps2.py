@@ -11,6 +11,7 @@ import cube
 import utils
 
 """ ADD HELPER FUNCTION HERE """
+# Task 1.1
 def isMatching(problem, state, index):
     if problem.goal.layout[index] == state.layout[index]:
         return True
@@ -29,10 +30,10 @@ def getDistance(currentIndex, goalIndex, length, width):
     stateX = goalIndex // length
     stateY = goalIndex % width
 
-    # print("distance")
-    # print(abs(currentX - stateX) + abs(currentY - stateY))
-
     return abs(currentX - stateX) + abs(currentY - stateY)
+
+# Task 1.2
+
 
 """
 We provide implementations for the Node and PriorityQueue classes in utils.py, but you can implement your own if you wish
@@ -62,21 +63,16 @@ def heuristic_func(problem: cube.Cube, state: cube.State) -> float:
         return 0
         
     # Number of Matches
-    numMatches = 0
-    totalMatches =  state.shape[0] * state.shape[1]
-
+    inPlace = 0
     for i in range(state.shape[0]):
         for j in range(state.shape[1]):
             if isMatching(problem, state, i + j):
-                numMatches += 1
-    h_n += numMatches / totalMatches
-    # h_n = numMatches
-    # print(h_n)
-
+                inPlace += 1
+    h_n = inPlace / min(state.shape[0], state.shape[1])    
 
     # Manhattan Distance
     ManhattanDistance = 0
-    totalDistance = max(state.shape[0] + 1, state.shape[1] + 1) * state.shape[0] * state.shape[1]
+    totalDistance = (state.shape[0] + state.shape[1] - 2) * state.shape[0] * state.shape[1]
     for i in range(state.shape[0]):
         for j in range(state.shape[1]):
             if not isMatching(problem, state, i + j):
@@ -84,7 +80,6 @@ def heuristic_func(problem: cube.Cube, state: cube.State) -> float:
                 ManhattanDistance += getDistance(i + j, goalIndex, state.shape[0], state.shape[1])
 
     h_n += (totalDistance - ManhattanDistance) / totalDistance
-    print(h_n)
     """ END YOUR CODE HERE """
 
     return h_n
@@ -159,7 +154,7 @@ def astar_search(problem: cube.Cube):
     solution = []
     
     """ YOUR CODE HERE """
- 
+
     """ END YOUR CODE HERE """
     
     if fail:
