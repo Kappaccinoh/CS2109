@@ -154,6 +154,34 @@ def astar_search(problem: cube.Cube):
     solution = []
     
     """ YOUR CODE HERE """
+    pQueue = PriorityQueue()
+    rootNode = Node(None, 
+                    None, 
+                    problem.initial, 
+                    0.0, 
+                    heuristic_func(problem, problem.initial))
+    pQueue.push(0, rootNode)
+
+    while len(pQueue) != 0:
+        currNode = pQueue.pop()
+        print(len(pQueue))
+        if problem.goal_test(currNode.state):
+            # Iterate backwards until intial state is reached, 
+            # add to the solution list for each iteration to give solution
+            while (currNode.parent != None):
+                action = currNode.act
+                solution.insert(0, action)
+                currNode = currNode.parent
+            return solution
+
+        for action in problem.actions(currNode.state):
+            nextState = problem.result(currNode.state, action)
+            nextNode = Node(currNode, 
+                            action, 
+                            nextState, 
+                            problem.path_cost(currNode.get_fn(), currNode.state, action, nextState), 
+                            heuristic_func(problem, nextState))
+            pQueue.push(nextNode.get_fn(), nextNode)
 
     """ END YOUR CODE HERE """
     
