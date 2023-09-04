@@ -474,7 +474,12 @@ def hill_climbing_with_random_restarts(cities: int, distances: List[Tuple[int]],
     route = []
     
     """ YOUR CODE HERE """
-
+    maxCurr = curr = random.sample(range(0,cities), cities)
+    for i in range(repeats):
+        curr = hill_climbing(cities, distances)
+        if evaluation_func(cities, distances, curr) > evaluation_func(cities, distances, maxCurr):
+            maxCurr = curr
+    return maxCurr
     """ END YOUR CODE HERE """
     
     return route
