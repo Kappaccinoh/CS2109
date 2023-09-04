@@ -5,6 +5,7 @@ import heapq
 import math
 import random
 import time
+import numpy as np
 from typing import List, Tuple
 
 import cube
@@ -68,7 +69,9 @@ def heuristic_func(problem: cube.Cube, state: cube.State) -> float:
         for j in range(state.shape[1]):
             if isMatching(problem, state, i + j):
                 inPlace += 1
-    h_n = inPlace / min(state.shape[0], state.shape[1])    
+    # h_n = inPlace / min(state.shape[0], state.shape[1])
+    h_n = ((state.shape[0] * state.shape[1]) - inPlace) / (state.shape[0] * state.shape[1])
+    h_n = 1 / h_n
 
     # Manhattan Distance
     ManhattanDistance = 0
@@ -162,26 +165,26 @@ def astar_search(problem: cube.Cube):
                     heuristic_func(problem, problem.initial))
     pQueue.push(0, rootNode)
 
-    while len(pQueue) != 0:
-        currNode = pQueue.pop()
-        print(len(pQueue))
-        if problem.goal_test(currNode.state):
-            # Iterate backwards until intial state is reached, 
-            # add to the solution list for each iteration to give solution
-            while (currNode.parent != None):
-                action = currNode.act
-                solution.insert(0, action)
-                currNode = currNode.parent
-            return solution
+    # while len(pQueue) != 0:
+    #     currNode = pQueue.pop()
+    #     # print(len(pQueue))
+    #     if problem.goal_test(currNode.state):
+    #         # Iterate backwards until intial state is reached, 
+    #         # add to the solution list for each iteration to give solution
+    #         while (currNode.parent != None):
+    #             action = currNode.act
+    #             solution.insert(0, action)
+    #             currNode = currNode.parent
+    #         return solution
 
-        for action in problem.actions(currNode.state):
-            nextState = problem.result(currNode.state, action)
-            nextNode = Node(currNode, 
-                            action, 
-                            nextState, 
-                            problem.path_cost(currNode.get_fn(), currNode.state, action, nextState), 
-                            heuristic_func(problem, nextState))
-            pQueue.push(nextNode.get_fn(), nextNode)
+    #     for action in problem.actions(currNode.state):
+    #         nextState = problem.result(currNode.state, action)
+    #         nextNode = Node(currNode, 
+    #                         action, 
+    #                         nextState, 
+    #                         problem.path_cost(currNode.get_fn(), currNode.state, action, nextState), 
+    #                         heuristic_func(problem, nextState))
+    #         pQueue.push(nextNode.get_fn(), nextNode)
 
     """ END YOUR CODE HERE """
     
@@ -328,7 +331,29 @@ def evaluation_func(cities: int, distances: List[Tuple[int]], route: List[int]) 
     h_n = 0.0
     
     """ YOUR CODE HERE """
+    ptr = 0
+    ptr1 = 1
+    totalDistance = 0
+    for i in range(cities - 1):
+        cityA = route[ptr]
+        cityB = route[ptr1]
+        for j in range(len(distances)):
+            if (cityA == distances[j][0] and cityB == distances[j][1]) or (cityA == distances[j][1] and cityB == distances[j][0]):
+                totalDistance += distances[j][2]
+                break
+        ptr += 1
+        ptr1 += 1
+
+    cityA = route[0]
+    cityB = route[cities - 1]
+    for j in range(len(distances)):
+            if (cityA == distances[j][0] and cityB == distances[j][1]) or (cityA == distances[j][1] and cityB == distances[j][0]):
+                totalDistance += distances[j][2]
     
+
+    h_n = 1 / totalDistance
+    # print("h_n:", h_n)
+
     """ END YOUR CODE HERE """
 
     return h_n
@@ -372,7 +397,23 @@ def hill_climbing(cities: int, distances: List[Tuple[int]]):
     route = []
     
     """ YOUR CODE HERE """
+    curr = random.sample(range(0,cities), cities)
+    while (True):
+        if (np.array_equal(curr, route)):
+            return route
 
+        currEval = evaluation_func(cities, distances, curr)
+        flag = False
+
+        for trans in transition(curr):
+            neighbourEval = evaluation_func(cities, distances, trans)
+            if neighbourEval > currEval:
+                curr = trans
+                flag = True
+
+        if not flag:
+            return curr
+        
     """ END YOUR CODE HERE """
     
     return route
