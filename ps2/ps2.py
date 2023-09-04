@@ -11,6 +11,28 @@ import cube
 import utils
 
 """ ADD HELPER FUNCTION HERE """
+def isMatching(problem, state, index):
+    if problem.goal.layout[index] == state.layout[index]:
+        return True
+    return False
+
+def getTargetCoord(problem, state, index):
+    for i in range(state.shape[0] * state.shape[1]):
+        if problem.goal.layout[i] == state.layout[index]:
+            return i
+    return False
+
+def getDistance(currentIndex, goalIndex, length, width):
+    currentX = currentIndex // length
+    currentY = currentIndex % width
+
+    stateX = goalIndex // length
+    stateY = goalIndex % width
+
+    # print("distance")
+    # print(abs(currentX - stateX) + abs(currentY - stateY))
+
+    return abs(currentX - stateX) + abs(currentY - stateY)
 
 """
 We provide implementations for the Node and PriorityQueue classes in utils.py, but you can implement your own if you wish
@@ -36,7 +58,33 @@ def heuristic_func(problem: cube.Cube, state: cube.State) -> float:
     goals = problem.goal
 
     """ YOUR CODE HERE """
-    
+    if problem.goal_test(state):
+        return 0
+        
+    # Number of Matches
+    numMatches = 0
+    totalMatches =  state.shape[0] * state.shape[1]
+
+    for i in range(state.shape[0]):
+        for j in range(state.shape[1]):
+            if isMatching(problem, state, i + j):
+                numMatches += 1
+    h_n += numMatches / totalMatches
+    # h_n = numMatches
+    # print(h_n)
+
+
+    # Manhattan Distance
+    ManhattanDistance = 0
+    totalDistance = max(state.shape[0] + 1, state.shape[1] + 1) * state.shape[0] * state.shape[1]
+    for i in range(state.shape[0]):
+        for j in range(state.shape[1]):
+            if not isMatching(problem, state, i + j):
+                goalIndex = getTargetCoord(problem, state, i + j)
+                ManhattanDistance += getDistance(i + j, goalIndex, state.shape[0], state.shape[1])
+
+    h_n += (totalDistance - ManhattanDistance) / totalDistance
+    print(h_n)
     """ END YOUR CODE HERE """
 
     return h_n
