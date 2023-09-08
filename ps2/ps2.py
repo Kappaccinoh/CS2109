@@ -64,25 +64,34 @@ def heuristic_func(problem: cube.Cube, state: cube.State) -> float:
         return 0
         
     # Number of Matches
-    inPlace = 0
-    for i in range(state.shape[0]):
-        for j in range(state.shape[1]):
-            if isMatching(problem, state, i + j):
-                inPlace += 1
+    # inPlace = 0
+    # for i in range(state.shape[0]):
+    #     for j in range(state.shape[1]):
+    #         if isMatching(problem, state, i + j):
+    #             inPlace += 1
     # h_n = inPlace / min(state.shape[0], state.shape[1])
-    h_n = ((state.shape[0] * state.shape[1]) - inPlace) / (state.shape[0] * state.shape[1])
-    h_n = 1 / h_n
+    # h_n = ((state.shape[0] * state.shape[1]) - inPlace) / (state.shape[0] * state.shape[1])
+    # h_n = 1 / h_n
 
     # Manhattan Distance
-    ManhattanDistance = 0
-    totalDistance = (state.shape[0] + state.shape[1] - 2) * state.shape[0] * state.shape[1]
+    # ManhattanDistance = 0
+    # totalDistance = (state.shape[0] + state.shape[1] - 2) * state.shape[0] * state.shape[1]
+    # for i in range(state.shape[0]):
+    #     for j in range(state.shape[1]):
+    #         if not isMatching(problem, state, i + j):
+    #             goalIndex = getTargetCoord(problem, state, i + j)
+    #             ManhattanDistance += getDistance(i + j, goalIndex, state.shape[0], state.shape[1])
+
+    # h_n += (totalDistance - ManhattanDistance) / totalDistance
+
+    # Relaxed Problem Approach - Minimum Moves
+    outOfPlace = 0
     for i in range(state.shape[0]):
         for j in range(state.shape[1]):
             if not isMatching(problem, state, i + j):
-                goalIndex = getTargetCoord(problem, state, i + j)
-                ManhattanDistance += getDistance(i + j, goalIndex, state.shape[0], state.shape[1])
+                outOfplace += 1
+    h_n = outOfplace / max(state.shape[0], state.shape[1])
 
-    h_n += (totalDistance - ManhattanDistance) / totalDistance
     """ END YOUR CODE HERE """
 
     return h_n
