@@ -104,31 +104,38 @@ def minimax(board, depth, max_depth, is_black: bool) -> tuple[Score, Move]:
     src_row, src_col: position of the pawn to move.
     dst_row, dst_col: position to move the pawn to.
     '''
-    src = None
-    dst = None
-    evaluation = -utils.WIN
-    
-    while depth <= max_depth:
-        allMoves = generate_valid_moves(board)
-        for move in allMoves
-        
-        if is_black:
-            bestValue = -utils.WIN
-            for each child node in node:
-                value = minimax(child node, depth - 1, False)
-                bestValue = max(bestValue, value)
-            return bestValue
-        else:
-            bestValue = utils.WIN
-            for each child node in node:
-                value = minimax(child node, depth - 1, True)
-                bestValue = min(bestValue, value)
-            return bestValue
-        
-        depth += 1
-    
-    return (evaluation, (src, dst))
-    
+    # recursion approach, black is max player, white is min player
+
+    # base case: depth exceeded or win/lose state reached
+    if utils.is_game_over(board) or depth > max_depth:
+        return (evaluate(board), (None, None))
+
+    # recursion
+    if not is_black:
+        currBoard = utils.invert_board(board, False)
+    else:
+        currBoard = board
+
+    allMoves = generate_valid_moves(currBoard)
+
+    if is_black:
+        bestMove = (-1 * utils.WIN, (None, None))
+        for move in allMoves:
+            newBoard = utils.state_change(board, move[0], move[1], False)
+            newMove = minimax(newBoard, depth + 1, max_depth, False)
+            if (newMove[0] > bestMove[0]):
+                bestMove = (newMove[0], move[0], move[1])
+
+    else:
+        bestMove = (utils.WIN, (None, None))
+        for move in allMoves:
+            newBoard = utils.state_change(board, move[0], move[1], False)
+            newMove = minimax(newBoard, depth + 1, max_depth, True)
+            if (newMove[0] < bestMove[0]):
+                bestMove = (newMove[0], move[0], move[1])
+            
+    return bestMove
+
 def test_21():
     board1 = [
         list("______"),
@@ -425,8 +432,18 @@ if __name__ == "__main__":
     board = utils.generate_init_state()
     res = utils.play(PlayerAI(), PlayerNaive(), board)
     # Black wins means your agent wins.
-    print(res)
+    # print(res)
 
 
 if __name__ == "__main__":
-    generate_valid_moves([['_', '_', 'B', '_', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_']])
+    # 101010 for black
+    # print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', 'B', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']], 0, 1, True))
+
+    # 101010 for black
+    # print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', 'B', 'W', '_', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']], 0, 3, True))
+
+    # -101010 for black
+    print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', 'B', '_', '_', '_'], ['_', 'W', 'W', 'W', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_']], 0 , 4, True))
+
+    # test
+    # print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'B', '_', '_', '_']], 0, 1, True))
