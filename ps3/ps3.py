@@ -104,23 +104,16 @@ def minimax(board, depth, max_depth, is_black: bool) -> tuple[Score, Move]:
     src_row, src_col: position of the pawn to move.
     dst_row, dst_col: position to move the pawn to.
     '''
-    bestMove = None
-    bestValue = -utils.WIN
+    v = minimaxCode(board, depth, max_depth, True)
     allMoves = generate_valid_moves(board)
     for move in allMoves:
         newBoard = utils.state_change(board, move[0], move[1], False)
-        value = minimaxCode(newBoard, depth + 1, max_depth, False)
-        if value > bestValue:
-            bestValue = value
-            bestMove = move
-    return (bestValue, bestMove)
-            
-def minimaxCode(board, depth, max_depth, is_black: bool):
-    # recursion approach, black is max player, white is min player
+        if (minimaxCode(newBoard, depth + 1, max_depth, False)[0] == v[0]):
+            return (v[0], move)
 
-    # base case: depth exceeded or win/lose state reached
-    if depth > max_depth or utils.is_game_over(board):
-        return evaluate(board)
+def minimaxCode(board, depth, max_depth, is_black: bool):
+    if utils.is_game_over(board) or depth > max_depth:
+        return (evaluate(board), (None, None))
 
     # recursion
     if not is_black:
@@ -131,21 +124,25 @@ def minimaxCode(board, depth, max_depth, is_black: bool):
     allMoves = generate_valid_moves(currBoard)
 
     if is_black:
-        bestMove = -utils.WIN
+        bestMove = (-1 * utils.WIN, (None, None))
         for move in allMoves:
-            newBoard = utils.state_change(board, move[0], move[1], False)
+            newBoard = utils.state_change(currBoard, move[0], move[1], False)
             newMove = minimaxCode(newBoard, depth + 1, max_depth, False)
-            bestMove = max(bestMove, newMove)
-        return bestMove
+            if (newMove[0] > bestMove[0]):
+                bestMove = (newMove[0], (move[0], move[1]))
 
     else:
-        bestMove = utils.WIN
+        bestMove = (utils.WIN, (None, None))
         for move in allMoves:
-            newBoard = utils.state_change(board, move[0], move[1], False)
+            newBoard = utils.state_change(currBoard, move[0], move[1], False)
+            newBoard = utils.invert_board(newBoard, False)
             newMove = minimaxCode(newBoard, depth + 1, max_depth, True)
-            bestMove = min(bestMove, newMove)
-        return bestMove
+            if (newMove[0] < bestMove[0]):
+                bestMove = (newMove[0], (move[0], move[1]))
 
+    return bestMove
+
+            
 def test_21():
     board1 = [
         list("______"),
@@ -447,13 +444,13 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     # 101010 for black
-    # print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', 'B', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']], 0, 1, True))
+    print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', 'B', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']], 0, 1, True))
 
     # 101010 for black
-    # print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', 'B', 'W', '_', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']], 0, 3, True))
+    print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', 'B', 'W', '_', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']], 0, 3, True))
 
     # -101010 for black
-    # print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', 'B', '_', '_', '_'], ['_', 'W', 'W', 'W', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_']], 0 , 4, True))
+    print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', 'B', '_', '_', '_'], ['_', 'W', 'W', 'W', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_']], 0 , 4, True))
 
     # test
-    print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'B', '_', '_', '_']], 0, 1, True))
+    # print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'B', '_', '_', '_']], 0, 1, True))
