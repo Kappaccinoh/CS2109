@@ -205,25 +205,21 @@ def negamax(board, depth, max_depth) -> tuple[Score, Move]:
     dst_row, dst_col: position to move the pawn to.
     '''
     v = negamaxCode(board, depth, max_depth)
-    allMoves = generate_valid_moves(board)
-    for move in allMoves:
-        newBoard = utils.state_change(board, move[0], move[1], False)
-        if (negamaxCode(newBoard, depth + 1, max_depth) == v):
-            return (v, move)
-
+    return v
+    
 def negamaxCode(board, depth, max_depth):
     if depth > max_depth or utils.is_game_over(board):
-        return evaluate(board)
+        return (evaluate(board), (None, None))
 
     allMoves = generate_valid_moves(board)
 
-    bestValue = -1 * utils.WIN
+    bestValue = (-1 * utils.WIN, (None, None))
     for move in allMoves:
         newBoard = utils.state_change(board, move[0], move[1], False)
         flippedBoard = utils.invert_board(newBoard, False)
-        value = -1 * negamaxCode(flippedBoard, depth + 1, max_depth)
-        if value > bestValue:
-            bestValue = value
+        value = -1 * negamaxCode(flippedBoard, depth + 1, max_depth)[0]
+        if value >= bestValue[0]:
+            bestValue = (value, move)
 
     return bestValue
 
@@ -464,14 +460,14 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     # 101010 for black
-    print([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', 'B', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']])
+    # print([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', 'B', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']])
     print(negamax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', 'B', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']], 0, 1))
 
     # 101010 for black
-    # print(negamax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', 'B', 'W', '_', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']], 0, 3))
+    print(negamax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', 'B', 'W', '_', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']], 0, 3))
 
     # -101010 for black
-    # print(negamax([['_', '_', '_', '_', '_', '_'], ['_', '_', 'B', '_', '_', '_'], ['_', 'W', 'W', 'W', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_']], 0 , 4))
+    print(negamax([['_', '_', '_', '_', '_', '_'], ['_', '_', 'B', '_', '_', '_'], ['_', 'W', 'W', 'W', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_']], 0 , 4))
 
     # test
     # print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'B', '_', '_', '_']], 0, 1, True))
