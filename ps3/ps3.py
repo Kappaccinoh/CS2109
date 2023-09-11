@@ -260,8 +260,43 @@ def test_22():
 # test_22()
 
 def minimax_alpha_beta(board, depth, max_depth, alpha, beta, is_black: bool) -> tuple[Score, Move]:
-    # TODO: Replace this with your own implementation
-    raise NotImplementedError
+    v = minimax_alpha_betaCode(board, depth, max_depth, alpha, beta, True)
+    return v
+
+def minimax_alpha_betaCode(board, depth, max_depth, alpha, beta, is_black: bool):
+    if depth > max_depth or utils.is_game_over(board):
+        return (evaluate(board), None)
+
+    if not is_black:
+        currBoard = utils.invert_board(board, False)
+    else:
+        currBoard = board
+
+    allMoves = generate_valid_moves(currBoard)
+
+    if is_black:
+        maxEval = (-utils.WIN, None)
+        for move in allMoves:
+            newBoard = utils.state_change(currBoard, move[0], move[1], False)
+            val = minimax_alpha_betaCode(newBoard, depth + 1, max_depth, alpha, beta, False)
+            if val[0] >= maxEval[0]:
+                maxEval = (val[0], move)
+            alpha = max(alpha, val[0])
+            if beta <= alpha:
+                break
+        return maxEval
+    else:
+        minEval = (utils.WIN, None)
+        for move in allMoves:
+            newBoard = utils.state_change(currBoard, move[0], move[1], False)
+            newBoard = utils.invert_board(newBoard, False)
+            val = minimax_alpha_betaCode(newBoard, depth + 1, max_depth, alpha, beta, True)
+            if val[0] <= minEval[0]:
+                minEval = (val[0], move)
+            beta = min(beta, val[0])
+            if beta <= alpha:
+                break
+        return minEval
 
 def test_31():
     board1 = [
@@ -459,15 +494,6 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    # 101010 for black
-    # print([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', 'B', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']])
-    print(negamax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', 'B', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']], 0, 1))
-
-    # 101010 for black
-    print(negamax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', 'B', 'W', '_', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']], 0, 3))
-
-    # -101010 for black
-    print(negamax([['_', '_', '_', '_', '_', '_'], ['_', '_', 'B', '_', '_', '_'], ['_', 'W', 'W', 'W', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', '_', '_', '_', '_', '_']], 0 , 4))
-
-    # test
-    # print(minimax([['_', '_', '_', '_', '_', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['_', '_', '_', 'W', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'B', '_', '_', '_']], 0, 1, True))
+    print(minimax_alpha_beta([['_', '_', '_', '_', '_', '_'], ['_', '_', 'B', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['W', 'B', 'W', '_', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']], 0, 3, -utils.WIN, utils.WIN, True))
+    print(minimax_alpha_beta([['_', '_', '_', '_', 'B', '_'], ['_', '_', '_', 'B', '_', '_'], ['_', '_', 'B', '_', '_', '_'], ['_', 'W', 'W', 'W', '_', '_'], ['_', '_', '_', '_', 'W', '_'], ['_', '_', '_', '_', '_', '_']], 0, 5, -utils.WIN, utils.WIN, True))
+    print(minimax_alpha_beta([['_', '_', '_', '_', 'B', '_'], ['_', '_', 'B', 'B', '_', '_'], ['_', '_', '_', '_', '_', '_'], ['_', 'W', 'W', 'W', '_', '_'], ['_', '_', '_', '_', 'W', '_'], ['_', '_', '_', '_', '_', '_']], 0, 6, -utils.WIN, utils.WIN, True))
