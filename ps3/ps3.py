@@ -112,7 +112,7 @@ def minimax(board, depth, max_depth, is_black: bool) -> tuple[Score, Move]:
             return (v, move)
 
 def minimaxCode(board, depth, max_depth, is_black: bool):
-    if depth > max_depth or utils.is_game_over(board):
+    if depth >= max_depth or utils.is_game_over(board):
         return evaluate(board)
 
     # recursion
@@ -208,7 +208,7 @@ def negamax(board, depth, max_depth) -> tuple[Score, Move]:
     return v
     
 def negamaxCode(board, depth, max_depth):
-    if depth > max_depth or utils.is_game_over(board):
+    if depth >= max_depth or utils.is_game_over(board):
         return (evaluate(board), (None, None))
 
     allMoves = generate_valid_moves(board)
