@@ -108,12 +108,12 @@ def minimax(board, depth, max_depth, is_black: bool) -> tuple[Score, Move]:
     allMoves = generate_valid_moves(board)
     for move in allMoves:
         newBoard = utils.state_change(board, move[0], move[1], False)
-        if (minimaxCode(newBoard, depth + 1, max_depth, False)[0] == v[0]):
-            return (v[0], move)
+        if (minimaxCode(newBoard, depth + 1, max_depth, False) == v):
+            return (v, move)
 
 def minimaxCode(board, depth, max_depth, is_black: bool):
     if depth > max_depth or utils.is_game_over(board):
-        return (evaluate(board), (None, None))
+        return evaluate(board)
 
     # recursion
     if not is_black:
@@ -124,21 +124,21 @@ def minimaxCode(board, depth, max_depth, is_black: bool):
     allMoves = generate_valid_moves(currBoard)
 
     if is_black:
-        bestMove = (-1 * utils.WIN, (None, None))
+        bestMove = -1 * utils.WIN
         for move in allMoves:
             newBoard = utils.state_change(currBoard, move[0], move[1], False)
             newMove = minimaxCode(newBoard, depth + 1, max_depth, False)
-            if (newMove[0] > bestMove[0]):
-                bestMove = (newMove[0], (move[0], move[1]))
+            if (newMove > bestMove):
+                bestMove = newMove
 
     else:
-        bestMove = (utils.WIN, (None, None))
+        bestMove = utils.WIN
         for move in allMoves:
             newBoard = utils.state_change(currBoard, move[0], move[1], False)
             newBoard = utils.invert_board(newBoard, False)
             newMove = minimaxCode(newBoard, depth + 1, max_depth, True)
-            if (newMove[0] < bestMove[0]):
-                bestMove = (newMove[0], (move[0], move[1]))
+            if (newMove < bestMove):
+                bestMove = newMove
 
     return bestMove
 
