@@ -215,9 +215,10 @@ def negamaxCode(board, depth, max_depth):
 
     bestValue = (-1 * utils.WIN, (None, None))
     for move in allMoves:
-        newBoard = utils.state_change(board, move[0], move[1], False)
-        flippedBoard = utils.invert_board(newBoard, False)
-        value = -1 * negamaxCode(flippedBoard, depth + 1, max_depth)[0]
+        newBoard = utils.state_change(board, move[0], move[1], False) # very costly
+
+        utils.invert_board(newBoard, True)
+        value = -1 * negamaxCode(newBoard, depth + 1, max_depth)[0]
         if value >= bestValue[0]:
             bestValue = (value, move)
 
@@ -268,16 +269,16 @@ def minimax_alpha_betaCode(board, depth, max_depth, alpha, beta, is_black: bool)
         return (evaluate(board), None)
 
     if not is_black:
-        currBoard = utils.invert_board(board, False)
+        utils.invert_board(board, True)
     else:
-        currBoard = board
+        board
 
-    allMoves = generate_valid_moves(currBoard)
+    allMoves = generate_valid_moves(board)
 
     if is_black:
         maxEval = (-utils.WIN, None)
         for move in allMoves:
-            newBoard = utils.state_change(currBoard, move[0], move[1], False)
+            newBoard = utils.state_change(board, move[0], move[1], False)
             val = minimax_alpha_betaCode(newBoard, depth + 1, max_depth, alpha, beta, False)
             if val[0] >= maxEval[0]:
                 maxEval = (val[0], move)
@@ -288,8 +289,8 @@ def minimax_alpha_betaCode(board, depth, max_depth, alpha, beta, is_black: bool)
     else:
         minEval = (utils.WIN, None)
         for move in allMoves:
-            newBoard = utils.state_change(currBoard, move[0], move[1], False)
-            newBoard = utils.invert_board(newBoard, False)
+            newBoard = utils.state_change(board, move[0], move[1], False)
+            utils.invert_board(newBoard, True)
             val = minimax_alpha_betaCode(newBoard, depth + 1, max_depth, alpha, beta, True)
             if val[0] <= minEval[0]:
                 minEval = (val[0], move)
@@ -347,8 +348,8 @@ def negamax_alpha_betaCode(board, depth, max_depth, alpha, beta):
 
     for move in allMoves:
         newBoard = utils.state_change(board, move[0], move[1], False)
-        flippedBoard = utils.invert_board(newBoard, False)
-        value = -1 * negamax_alpha_betaCode(flippedBoard, depth + 1, max_depth, -beta, -alpha)[0]
+        utils.invert_board(newBoard, True)
+        value = -1 * negamax_alpha_betaCode(newBoard, depth + 1, max_depth, -beta, -alpha)[0]
         if value >= bestValue[0]:
             bestValue = (value, move)
         alpha = max(alpha, value)
