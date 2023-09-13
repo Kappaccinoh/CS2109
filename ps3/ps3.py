@@ -397,9 +397,44 @@ def test_32():
 # Uncomment and implement the function.
 # Note: this will override the provided `evaluate` function.
 
-# def evaluate(board):
-#     # TODO: replace this with your own implementation
-#     raise NotImplementedError
+def evaluate(board):
+    blackPieces = 0
+    whitePieces = 0
+
+    boardLength = len(board)
+
+    blackEvaluationBoard = [
+        10,10,20,40,50,utils.WIN
+    ]
+
+    whiteEvaluationBoard = [
+        -utils.WIN,-50,-40,-20,-10,-10
+    ]
+
+    blackEval = 0
+    whiteEval = 0
+
+    for i in range(boardLength):
+        for j in range(boardLength):
+            piece = board[i][j]
+            if piece == 'B':
+                blackPieces += 1
+                blackEval += blackEvaluationBoard[i]
+                if i == boardLength - 1:
+                    return utils.WIN
+            elif piece == 'W':
+                whitePieces += 1
+                whiteEval += whiteEvaluationBoard[i]
+                if i == 0:
+                    return -utils.WIN
+            
+    if blackPieces == 0 and whitePieces != 0:
+        return -utils.WIN
+    if whitePieces == 0 and blackPieces != 0:
+        return utils.WIN
+    
+    score = blackEval + whiteEval
+    return score
 
 def test_41():
     board1 = [
