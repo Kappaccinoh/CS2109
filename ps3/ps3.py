@@ -265,7 +265,7 @@ def minimax_alpha_beta(board, depth, max_depth, alpha, beta, is_black: bool) -> 
     return v
 
 def minimax_alpha_betaCode(board, depth, max_depth, alpha, beta, is_black: bool):
-    if depth > max_depth or utils.is_game_over(board):
+    if depth >= max_depth or utils.is_game_over(board):
         return (evaluate(board), None)
 
     if not is_black:
@@ -340,7 +340,7 @@ def negamax_alpha_beta(board, depth, max_depth, alpha, beta) -> tuple[Score, Mov
     return v
 
 def negamax_alpha_betaCode(board, depth, max_depth, alpha, beta):
-    if depth > max_depth or utils.is_game_over(board):
+    if depth >= max_depth or utils.is_game_over(board):
         return (evaluate(board), (None, None))
     
     allMoves = generate_valid_moves(board)
