@@ -262,11 +262,15 @@ def test_22():
 
 def minimax_alpha_beta(board, depth, max_depth, alpha, beta, is_black: bool) -> tuple[Score, Move]:
     v = minimax_alpha_betaCode(board, depth, max_depth, alpha, beta, True)
-    return v
+    allMoves = generate_valid_moves(board)
+    for move in allMoves:
+        newBoard = utils.state_change(board, move[0], move[1], False)
+        if (minimax_alpha_betaCode(newBoard, depth + 1, max_depth, alpha, beta, False) == v):
+            return (v, move)
 
 def minimax_alpha_betaCode(board, depth, max_depth, alpha, beta, is_black: bool):
     if depth >= max_depth or utils.is_game_over(board):
-        return (evaluate(board), None)
+        return evaluate(board)
 
     if not is_black:
         utils.invert_board(board, True)
@@ -276,25 +280,25 @@ def minimax_alpha_betaCode(board, depth, max_depth, alpha, beta, is_black: bool)
     allMoves = generate_valid_moves(board)
 
     if is_black:
-        maxEval = (-utils.WIN, None)
+        maxEval = -utils.WIN
         for move in allMoves:
             newBoard = utils.state_change(board, move[0], move[1], False)
             val = minimax_alpha_betaCode(newBoard, depth + 1, max_depth, alpha, beta, False)
-            if val[0] >= maxEval[0]:
-                maxEval = (val[0], move)
-            alpha = max(alpha, val[0])
+            if val >= maxEval:
+                maxEval = val
+            alpha = max(alpha, val)
             if beta <= alpha:
                 break
         return maxEval
     else:
-        minEval = (utils.WIN, None)
+        minEval = utils.WIN
         for move in allMoves:
             newBoard = utils.state_change(board, move[0], move[1], False)
             utils.invert_board(newBoard, True)
             val = minimax_alpha_betaCode(newBoard, depth + 1, max_depth, alpha, beta, True)
-            if val[0] <= minEval[0]:
-                minEval = (val[0], move)
-            beta = min(beta, val[0])
+            if val <= minEval:
+                minEval = val
+            beta = min(beta, val)
             if beta <= alpha:
                 break
         return minEval
