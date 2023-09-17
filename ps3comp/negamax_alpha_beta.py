@@ -44,7 +44,7 @@ def negamax_alpha_beta(board, depth, max_depth, alpha, beta, transpositionTable,
         newBoard = utils.state_change(board, move[0], move[1], False)
         utils.invert_board(newBoard, True)
         if (-negamax_alpha_betaCode(newBoard, depth + 1, max_depth, -beta, -alpha, transpositionTable, zobristTable) == v):
-            return (v, move)
+            return move
 
 def negamax_alpha_betaCode(board, depth, max_depth, alpha, beta, transpositionTable, zobristTable):
     if depth >= max_depth or utils.is_game_over(board):
