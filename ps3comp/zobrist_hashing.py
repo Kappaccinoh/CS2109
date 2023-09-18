@@ -32,14 +32,14 @@ def initTable():
 
 def computeHash(board, ZobristTable):
     h = 0
-    for i in range(8):
-        for j in range(8):
+    for i in range(BOARD_LENGTH):
+        for j in range(BOARD_LENGTH):
             if (board[i][j] != '_'):
                 piece = indexOf(board[i][j])
                 h ^= ZobristTable[i][j][piece]
     return h
 
-def updateHashOnMove(zobristTable, hash_value, src, dst, piece):
-    hashValue ^= ZobristTable[src[0]][src[1]][indexOf(piece)]
-    hashValue ^= ZobristTable[dst[0]][dst[1]][indexOf(piece)]
-    return hash_value
+def updateHashOnMove(zobristTable, hashValue, src, dst, piece):
+    hashValue ^= zobristTable[src[0]][src[1]][indexOf(piece)]
+    hashValue ^= zobristTable[dst[0]][dst[1]][indexOf(piece)]
+    return hashValue

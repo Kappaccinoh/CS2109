@@ -23,30 +23,51 @@ Move = tuple[tuple[int, int], tuple[int, int]]
     # Transposition Table (Zobrist Hashing) - Database essentially for Opening and Endgame
 
 def deepBlue(board):
-    # transpositionTable = dict()
-    # zobristTable = initTable()
-    # hashValue = computeHash(board, zobristTable) # For init only
-    transpositionTable = 0
-    zobristTable = 0
+    transpositionTable = dict()
+    zobristTable = zobrist_hashing.initTable()
+    hashValue = zobrist_hashing.computeHash(board, zobristTable) # For init only
 
     start = time.time()
     bestMove = None
     max_depth = 1
     while (time.time() - start < TIME_LIMIT):
-        bestMove = negamax_alpha_beta(board, 0, max_depth, ALPHA, BETA, transpositionTable, zobristTable)
+        currMove = negamax_alpha_beta(board, 0, max_depth, ALPHA, BETA, transpositionTable, zobristTable, hashValue)
+        if currMove != None:
+            bestMove = currMove
         max_depth += 1
     return bestMove
 
-def negamax_alpha_beta(board, depth, max_depth, alpha, beta, transpositionTable, zobristTable) -> tuple[Score, Move]:
-    v = negamax_alpha_betaCode(board, depth, max_depth, alpha, beta, transpositionTable, zobristTable)
+def negamax_alpha_beta(board, depth, max_depth, alpha, beta, transpositionTable, zobristTable, hashValue) -> tuple[Score, Move]:
+    v = negamax_alpha_betaCode(board, depth, max_depth, alpha, beta, transpositionTable, zobristTable, hashValue)
     allMoves = generate_valid_moves(board)
     for move in allMoves:
+
+        # Main Code
         newBoard = utils.state_change(board, move[0], move[1], False)
         utils.invert_board(newBoard, True)
-        if (-negamax_alpha_betaCode(newBoard, depth + 1, max_depth, -beta, -alpha, transpositionTable, zobristTable) == v):
+
+        # Updating TranspositionTable
+        newHashValue = zobrist_hashing.updateHashOnMove(zobristTable, hashValue, move[0], move[1], 'B')
+        if newHashValue in transpositionTable:
+            valuePair = transpositionTable[newHashValue]
+            # valuePair (score, depth)
+            if valuePair[1] < depth:
+                # Update Transposition Table
+                transpositionTable[newHashValue] = (evaluate(newBoard), depth)
+        else:
+            transpositionTable[newHashValue] = (evaluate(newBoard), depth)
+        
+        if (-negamax_alpha_betaCode(newBoard, depth + 1, max_depth, -beta, -alpha, transpositionTable, zobristTable, newHashValue) == v):
             return move
 
-def negamax_alpha_betaCode(board, depth, max_depth, alpha, beta, transpositionTable, zobristTable):
+def negamax_alpha_betaCode(board, depth, max_depth, alpha, beta, transpositionTable, zobristTable, currBoardsHashValue):
+    # check transpositionTable for existing positions
+    if currBoardsHashValue in transpositionTable:
+        valuePair = transpositionTable[currBoardsHashValue]
+        # valuePair (score, depth)
+        if valuePair[1] >= depth:
+            return valuePair[0]
+
     if depth >= max_depth or utils.is_game_over(board):
         return evaluate(board)
     
@@ -54,9 +75,23 @@ def negamax_alpha_betaCode(board, depth, max_depth, alpha, beta, transpositionTa
     bestValue = -1 * utils.WIN
 
     for move in allMoves:
+        # Main Logic
         newBoard = utils.state_change(board, move[0], move[1], False)
         utils.invert_board(newBoard, True)
-        value = -1 * negamax_alpha_betaCode(newBoard, depth + 1, max_depth, -beta, -alpha, transpositionTable, zobristTable)
+
+        # Updating TranspositionTable
+        newHashValue = zobrist_hashing.updateHashOnMove(zobristTable, currBoardsHashValue, move[0], move[1], 'B')
+        if newHashValue in transpositionTable:
+            valuePair = transpositionTable[newHashValue]
+            # valuePair (score, depth)
+            if valuePair[1] < depth:
+                # Update Transposition Table
+                transpositionTable[newHashValue] = (evaluate(newBoard), depth)
+        else:
+            transpositionTable[newHashValue] = (evaluate(newBoard), depth)
+
+        # Main Logic Continued...
+        value = -1 * negamax_alpha_betaCode(newBoard, depth + 1, max_depth, -beta, -alpha, transpositionTable, zobristTable, newHashValue)
         if value >= bestValue:
             bestValue = value
         alpha = max(alpha, value)
