@@ -1,31 +1,60 @@
-import zobrist_hashing
+# import zobrist_hashing
 import utils
 import time
 import sys
+import random
 
 MAX_DEPTH = sys.maxsize
 ALPHA = -sys.maxsize
 BETA = sys.maxsize
-TIME_LIMIT = 2.5
+TIME_LIMIT = 1
+
+NUM_PIECES = 2
+EMPTY = 0
+PAWN = 1 # black or white
+BOARD_SIZE = 36 # 6x6
+BOARD_LENGTH = 6
+
+'''
+Usage
+zobristTable = initTable()
+hashValue = computeHash(board, zobristTable) // For init only
+
+newHashValue = updateHashOnMove(zobristTable, prevHashValue, src, dst, piece) // piece == '_' or piece == 'W' or piece == 'B'
+
+'''
 
 Score = int | float
 Move = tuple[tuple[int, int], tuple[int, int]]
 
-# DeepBlue:
-    # minimax (DONE)
-    # alpha beta (DONE)
-    # progressive deepening (DONE)
-    # opening book (DONE)
-    # endgame (DONE)
-    # uneven tree development (too hard lol)
-    # parallel computing?? (what)
+class PlayerAI:
 
-    # Transposition Table (Zobrist Hashing) - Database essentially for Opening and Endgame
+    def make_move(self, board) -> Move:
+        '''
+        This is the function that will be called from main.py
+        You should combine the functions in the previous tasks
+        to implement this function.
+
+        Parameters
+        ----------
+        self: object instance itself, passed in automatically by Python.
+        
+        board: 2D list-of-lists. Contains characters 'B', 'W', and '_' 
+        representing black pawn, white pawn and empty cell respectively.
+        
+        Returns
+        -------
+        Two tuples of coordinates [row_index, col_index].
+        The first tuple contains the source position of the black pawn
+        to be moved, the second list contains the destination position.
+        '''
+        return deepBlue(board)
+        
 
 def deepBlue(board):
     transpositionTable = dict()
-    zobristTable = zobrist_hashing.initTable()
-    hashValue = zobrist_hashing.computeHash(board, zobristTable) # For init only
+    zobristTable = initTable()
+    hashValue = computeHash(board, zobristTable) # For init only
 
     start = time.time()
     bestMove = None
@@ -47,7 +76,7 @@ def negamax_alpha_beta(board, depth, max_depth, alpha, beta, transpositionTable,
         utils.invert_board(newBoard, True)
 
         # Updating TranspositionTable
-        newHashValue = zobrist_hashing.updateHashOnMove(zobristTable, hashValue, move[0], move[1], 'B')
+        newHashValue = updateHashOnMove(zobristTable, hashValue, move[0], move[1], 'B')
         if newHashValue in transpositionTable:
             valuePair = transpositionTable[newHashValue]
             # valuePair (score, depth)
@@ -59,7 +88,7 @@ def negamax_alpha_beta(board, depth, max_depth, alpha, beta, transpositionTable,
         
         if (-negamax_alpha_betaCode(newBoard, depth + 1, max_depth, -beta, -alpha, transpositionTable, zobristTable, newHashValue) == v):
             return move
-    # return ((0,0),(0,0))
+    # return ((0,0), (0,0))
 
 def negamax_alpha_betaCode(board, depth, max_depth, alpha, beta, transpositionTable, zobristTable, currBoardsHashValue):
     # check transpositionTable for existing positions
@@ -81,7 +110,7 @@ def negamax_alpha_betaCode(board, depth, max_depth, alpha, beta, transpositionTa
         utils.invert_board(newBoard, True)
 
         # Updating TranspositionTable
-        newHashValue = zobrist_hashing.updateHashOnMove(zobristTable, currBoardsHashValue, move[0], move[1], 'B')
+        newHashValue = updateHashOnMove(zobristTable, currBoardsHashValue, move[0], move[1], 'B')
         if newHashValue in transpositionTable:
             valuePair = transpositionTable[newHashValue]
             # valuePair (score, depth)
@@ -162,3 +191,32 @@ def evaluate(board):
     
     score = blackEval + whiteEval
     return score
+
+def randomInt():
+    min = 0
+    max = pow(2, 64)
+    return random.randint(min, max)
+
+def indexOf(piece):
+    if (piece=='_'):
+        return 0
+    else:
+        return 1
+
+def initTable():
+    ZobristTable = [[[randomInt() for k in range(NUM_PIECES)] for j in range(BOARD_LENGTH)] for i in range(BOARD_LENGTH)]
+    return ZobristTable
+
+def computeHash(board, ZobristTable):
+    h = 0
+    for i in range(BOARD_LENGTH):
+        for j in range(BOARD_LENGTH):
+            if (board[i][j] != '_'):
+                piece = indexOf(board[i][j])
+                h ^= ZobristTable[i][j][piece]
+    return h
+
+def updateHashOnMove(zobristTable, hashValue, src, dst, piece):
+    hashValue ^= zobristTable[src[0]][src[1]][indexOf(piece)]
+    hashValue ^= zobristTable[dst[0]][dst[1]][indexOf(piece)]
+    return hashValue
