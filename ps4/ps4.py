@@ -82,7 +82,67 @@ def add_bias_column(X):
     bias = np.ones((length, 1))
     finalArr = np.append(bias, X, axis=1)
     return finalArr
+
+def get_bias_and_weight(X, y, include_bias = True):
+    '''
+    Calculate bias and weights that give the best fitting line.
+
+    Parameters
+    ----------
+    X (np.ndarray) : (m, n) numpy matrix representing feature matrix
+    y (np.ndarray) : (m, 1) numpy matrix representing target values
+    include_bias (boolean) : Specify whether the model should include a bias term
+    
+    Returns
+    -------
+        bias (float):
+            If include_bias = True, return the bias constant. Else,
+            return 0
+        weights (np.ndarray):
+            A (n, 1) numpy matrix representing the weight constant(s).
+    '''
+    # print(X)
+    # print(y)
+    # XtX = [14,21],[21,34]
+    # (XtX)^-1 = [34/35, -3/5],[-3/5, 2/5]
+    # (XtX)^-1 Xt = [-29/35,1/7,18/35],[3/5,0,-1/5]
+    # (XtX)^-1 Xt y = [17/35, 6/5] = 0.485714
+    if not include_bias:
+        length = len(X)
+        bias = np.zeros((length, 1))
+        finalArr = np.append(bias, X, axis=1)
+    else:
+        X = add_bias_column(X)
+    finalarr = np.matmul(np.matmul(np.linalg.inv(np.matmul(X.transpose(), X)), X.transpose()), y)
+    if not include_bias:
+        return (0, finalarr)
+    ans = (finalarr[0][0], finalarr[1:])
+    return ans
+
+def get_prediction_linear_regression(X, y, include_bias = True):
+    '''
+    Calculate the best fitting line.
+
+    Parameters
+    ----------
+    X (np.ndarray) : (m, n) numpy matrix representing feature matrix
+    y (np.ndarray) : (m, 1) numpy matrix representing target values
+    include_bias (boolean) : Specify whether to use bias term
+
+    Returns
+    -------
+        A (m, 1) numpy matrix representing prediction values.
+    '''
+  
+    # TODO: add your solution here and remove `raise NotImplementedError`
+    raise NotImplementedError
+
   
 if __name__ == "__main__":
-    ans = np.array_equal(add_bias_column(np.array([[1, 2], [3, 4]])), np.array([[1, 1, 2], [1, 3, 4]]))
-    print(ans)
+    public_X, public_y = np.array([[1, 3], [2, 3], [3, 4]]), np.arange(4, 7).reshape((-1, 1))
+    # ans = np.round(get_bias_and_weight(public_X, public_y)[0], 5)
+    # print(ans)
+    ans = np.round(get_bias_and_weight(public_X, public_y, False)[1], 2)
+    print("output", ans)
+    ans = np.round(np.array([[0.49], [1.20]]), 2)
+    print("actual", ans)
