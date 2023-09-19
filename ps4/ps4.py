@@ -101,12 +101,6 @@ def get_bias_and_weight(X, y, include_bias = True):
         weights (np.ndarray):
             A (n, 1) numpy matrix representing the weight constant(s).
     '''
-    # print(X)
-    # print(y)
-    # XtX = [14,21],[21,34]
-    # (XtX)^-1 = [34/35, -3/5],[-3/5, 2/5]
-    # (XtX)^-1 Xt = [-29/35,1/7,18/35],[3/5,0,-1/5]
-    # (XtX)^-1 Xt y = [17/35, 6/5] = 0.485714
     if not include_bias:
         length = len(X)
         bias = np.zeros((length, 1))
@@ -115,8 +109,10 @@ def get_bias_and_weight(X, y, include_bias = True):
         X = add_bias_column(X)
     finalarr = np.matmul(np.matmul(np.linalg.inv(np.matmul(X.transpose(), X)), X.transpose()), y)
     if not include_bias:
+        # ans = (0, [[w1],[w2],...])
         return (0, finalarr)
     ans = (finalarr[0][0], finalarr[1:])
+    # ans = (bias = w0, [[w1], [w2],...])
     return ans
 
 def get_prediction_linear_regression(X, y, include_bias = True):
@@ -133,9 +129,16 @@ def get_prediction_linear_regression(X, y, include_bias = True):
     -------
         A (m, 1) numpy matrix representing prediction values.
     '''
-  
-    # TODO: add your solution here and remove `raise NotImplementedError`
-    raise NotImplementedError
+    length = len(X)
+    w = get_bias_and_weight(X,y,include_bias)
+    bias = w[0]
+    biasCol = np.full((length, 1), bias)
+
+    # X = (num entries, num features)
+    # w = (num features)
+    # res = Xw + bias
+    res = np.matmul(X, w[1:])+ biasCol
+    return res
 
   
 if __name__ == "__main__":
