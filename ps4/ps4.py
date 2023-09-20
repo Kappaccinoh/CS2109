@@ -256,9 +256,7 @@ def gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250):
         weightMatrix = np.full((length, n), np.sum(weights, axis=1))
 
         y_predicted = y_predicted + biasMatrix + np.sum(weightMatrix * X, axis=1).reshape(length,1)
-        print(y_predicted)
-        print(y)
-        y_true = y
+        y_true = np.array(y)
         mseScore = mean_squared_error(y_true, y_predicted)
         loss.append(mseScore)
     
@@ -277,6 +275,7 @@ if __name__ == "__main__":
     # plt.xlabel('Epoch number')
     # plt.ylabel('Loss')
     # plt.show()
+
     X = [
         [1,2,3,4,5],
         [2,3,4,5,6],
@@ -287,4 +286,17 @@ if __name__ == "__main__":
         [4],
         [9]
     ]
-    gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250)
+    a = gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250)
+    # print(a)
+
+    # X = [
+    #     [1],
+    #     [2],
+    #     [7]
+    # ]
+    # y = [
+    #     [3],
+    #     [4],
+    #     [9]
+    # ]
+    # gradient_descent_one_variable(X, y, lr = 1e-5, number_of_epochs = 250)
