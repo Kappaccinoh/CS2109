@@ -219,46 +219,32 @@ def gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250):
 
     # Do not change
     bias = 0
-    # weights.shape = (n, 1) initialised to 0
     weights = np.full((n, 1), 0).astype(float)
     loss = []
 
-    # Recall Matrix Multiplication
-    # A x B
-    # A(c,d) and B(d,1)
-    # c - number of samples
-    # d - number of features
-    # e - 1
-
     for i in range(number_of_epochs):
-        biasMatrix = np.full((length, 1), bias)
-        weightMatrix = np.full((length, n), np.sum(weights, axis=1))
-
         # updating bias
-        partial = np.sum(biasMatrix + np.sum(weightMatrix * X, axis=1).reshape(length,1) - y) / length
+        biasMatrix = np.full((length, 1), bias)
+        partial = np.sum(biasMatrix + np.sum(np.matmul(X, weights), axis=1).reshape(length, 1) - y) / length
         newBias = bias - lr * partial
 
-        # updating weights
-        hw = biasMatrix + np.sum(weightMatrix * X, axis=1).reshape(length,1) - y
-        tempCoeff = np.repeat(weights, length, axis=1)
-        partial = np.matmul(tempCoeff, hw) / length
-        newWeight = weights - lr * partial
+        partial0 = biasMatrix + np.sum(np.matmul(X, weights), axis=1).reshape(length, 1) - y
+        partial1 = np.matmul(np.array(X).transpose(), partial0) / length
+        newWeight = weights - lr * partial1
 
         bias = newBias
         weights = newWeight
-
         '''
         y_true (np.ndarray) : (m, 1) numpy matrix consists of target value
         y_pred (np.ndarray) : (m, 1) numpy matrix consists of prediction
         '''
         y_predicted = np.full((length, 1), 0)
         biasMatrix = np.full((length, 1), bias)
-        weightMatrix = np.full((length, n), np.sum(weights, axis=1))
-
-        y_predicted = y_predicted + biasMatrix + np.sum(weightMatrix * X, axis=1).reshape(length,1)
+        y_predicted = y_predicted + biasMatrix + np.matmul(X, weights)
         y_true = np.array(y)
         mseScore = mean_squared_error(y_true, y_predicted)
         loss.append(mseScore)
+        print(mseScore)
     
     return bias, weights, loss
 
@@ -276,17 +262,30 @@ if __name__ == "__main__":
     # plt.ylabel('Loss')
     # plt.show()
 
+    # X = [
+    #     [1,2,3,4,5],
+    #     [2,3,4,5,6],
+    #     [7,8,9,10,11]
+    # ]
+    # y = [
+    #     [3],
+    #     [4],
+    #     [9]
+    # ]
     X = [
-        [1,2,3,4,5],
+        [4,5,2,3,4],
         [2,3,4,5,6],
-        [7,8,9,10,11]
+        [4,5,6,7,8],
+        [3,7,2,2,6]
     ]
     y = [
         [3],
         [4],
+        [6],
         [9]
     ]
-    a = gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250)
+    # a = gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250)
+    a = gradient_descent_multi_variable(X, y)[2][0] > gradient_descent_multi_variable(X, y)[2][-1]
     # print(a)
 
     # X = [
