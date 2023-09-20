@@ -248,21 +248,76 @@ def gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250):
     
     return bias, weights, loss
 
+def create_polynomial_matrix(X, power = 2):
+    '''
+    Create a polynomial matrix.
+    
+    Parameters
+    ----------
+    X: (m, 1) numpy matrix
+
+    Returns
+    -------
+        A (m, power) numpy matrix where the i-th element denotes
+            X raised to the power of i.
+    '''
+    length = len(X)
+    a = np.tile(X, power)
+    a = np.cumprod(a, axis=1)
+    return a
+
+def get_prediction_poly_regression(X, y, power = 2, include_bias = True):
+    '''
+    Calculate the best polynomial line.
+
+    Parameters
+    ----------
+    X (np.ndarray) : (m, 1) numpy matrix representing feature matrix
+    y (np.ndarray) : (m, 1) numpy matrix representing target values
+    power (int) : Specify the degree of the polynomial
+    include_bias (boolean) : Specify whether to use bias term
+
+    Returns
+    -------
+        A (m, 1) numpy matrix representing prediction values.
+    '''
+    polyMatrix = create_polynomial_matrix(X, power)
+    linreg = get_prediction_linear_regression(polyMatrix, y, include_bias)
+    return linreg
+
+def feature_scaling(X):
+    '''
+    Mean normalized each feature column.
+
+    Parameters
+    ----------
+    X (np.ndarray) : (m, n) numpy matrix representing feature matrix
+
+    Returns
+    -------
+        A (m, n) numpy matrix where each column has been mean-normalized.
+    '''
+    
 
 if __name__ == "__main__":
-    X = [
-        [4,5,2,3,4],
-        [2,3,4,5,6],
-        [4,5,6,7,8],
-        [3,7,2,2,6]
-    ]
-    y = [
-        [3],
-        [4],
-        [6],
-        [9]
-    ]
+    X = [[1], [2], [3]]
+    y = [[4], [5], [6]]
+    a = get_prediction_poly_regression(X,y,2)
+    print(a)
+    # X = [
+    #     [4,5,2,3,4],
+    #     [2,3,4,5,6],
+    #     [4,5,6,7,8],
+    #     [3,7,2,2,6]
+    # ]
+    # y = [
+    #     [3],
+    #     [4],
+    #     [6],
+    #     [9]
+    # ]
     # a = gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250)
-    a = gradient_descent_multi_variable(X, y)[2][0] > gradient_descent_multi_variable(X, y)[2][-1]
+    # a = gradient_descent_multi_variable(X, y)[2][0] > gradient_descent_multi_variable(X, y)[2][-1]
     # print(a)
-    
+    # print(create_polynomial_matrix(np.array([[1], [2], [3]]), 3))
+    # np.array_equal(create_polynomial_matrix(np.array([[1], [2], [3]]), 3), np.array([[1, 1, 1], [2, 4, 8], [3, 9, 27]]))
