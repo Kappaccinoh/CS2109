@@ -5,6 +5,7 @@ import time
 import traceback
 import multiprocessing
 import timeout_decorator
+from pprint import pprint
 
 # board row and column -> these are constant
 ROW, COL = 6, 6
@@ -173,7 +174,11 @@ def play(playerAI_A, playerAI_B, board):
 
     # game starts
     color = None
+    movenum = 0
     while not is_game_over(board):
+        print("move:", movenum)
+        movenum += 1
+        pprint(board)
         player = players[move % 2]
         color = colors[move % 2]
         src, dst = MOVE_NONE
