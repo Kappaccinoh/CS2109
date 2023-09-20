@@ -250,28 +250,6 @@ def gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250):
 
 
 if __name__ == "__main__":
-    # X, y = np.array([[1], [2], [3]]), np.arange(4, 7).reshape((-1, 1))
-    # gradient_descent_one_variable(X, y, lr = 1e-5, number_of_epochs = 250)[2][0] > gradient_descent_one_variable(X, y, lr = 1e-5, number_of_epochs = 250)[2][-1]    
-
-    # import matplotlib.pyplot as plt
-
-    # area = X[:, 0].reshape((-1, 1))
-    # b, w, loss = gradient_descent_one_variable(area, y, 1e-5, 250)
-    # plt.plot([i for i in range(len(loss))], loss)
-    # plt.xlabel('Epoch number')
-    # plt.ylabel('Loss')
-    # plt.show()
-
-    # X = [
-    #     [1,2,3,4,5],
-    #     [2,3,4,5,6],
-    #     [7,8,9,10,11]
-    # ]
-    # y = [
-    #     [3],
-    #     [4],
-    #     [9]
-    # ]
     X = [
         [4,5,2,3,4],
         [2,3,4,5,6],
@@ -287,15 +265,4 @@ if __name__ == "__main__":
     # a = gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250)
     a = gradient_descent_multi_variable(X, y)[2][0] > gradient_descent_multi_variable(X, y)[2][-1]
     # print(a)
-
-    # X = [
-    #     [1],
-    #     [2],
-    #     [7]
-    # ]
-    # y = [
-    #     [3],
-    #     [4],
-    #     [9]
-    # ]
-    # gradient_descent_one_variable(X, y, lr = 1e-5, number_of_epochs = 250)
+    
