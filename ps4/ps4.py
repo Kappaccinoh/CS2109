@@ -297,27 +297,26 @@ def feature_scaling(X):
     -------
         A (m, n) numpy matrix where each column has been mean-normalized.
     '''
-    
+    m = len(X)
+    n = len(X[0])
+
+    meanMatrix = np.mean(X, axis=0)
+    meanMatrix = meanMatrix.reshape((1,-1))
+    meanMatrix = np.repeat(meanMatrix, m, axis=0)
+
+    stdMatrix = np.std(X, axis=0)
+    stdMatrix = stdMatrix.reshape((1,-1))
+    stdMatrix = np.repeat(stdMatrix, m, axis=0)
+
+    a = (X - meanMatrix) / stdMatrix
+    return a
 
 if __name__ == "__main__":
-    X = [[1], [2], [3]]
-    y = [[4], [5], [6]]
-    a = get_prediction_poly_regression(X,y,2)
-    print(a)
-    # X = [
-    #     [4,5,2,3,4],
-    #     [2,3,4,5,6],
-    #     [4,5,6,7,8],
-    #     [3,7,2,2,6]
-    # ]
-    # y = [
-    #     [3],
-    #     [4],
-    #     [6],
-    #     [9]
-    # ]
-    # a = gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250)
-    # a = gradient_descent_multi_variable(X, y)[2][0] > gradient_descent_multi_variable(X, y)[2][-1]
-    # print(a)
-    # print(create_polynomial_matrix(np.array([[1], [2], [3]]), 3))
-    # np.array_equal(create_polynomial_matrix(np.array([[1], [2], [3]]), 3), np.array([[1, 1, 1], [2, 4, 8], [3, 9, 27]]))
+    X = [
+        [4,5,2,3,4],
+        [2,3,4,5,6],
+        [4,5,6,7,8],
+        [3,7,2,2,6]
+    ]
+
+    feature_scaling(X)
