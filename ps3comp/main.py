@@ -1,9 +1,8 @@
-from negamax_alpha_beta import deepBlue
+# from negamax_alpha_beta import deepBlue
 import coursemologysubmission
 from coursemologysubmission import PlayerAI
 from playerNaive import PlayerNaive
 import utils
-import ids
 
 if __name__ == "__main__":
     # print(deepBlue([['_', '_', '_', '_', '_', '_'], ['_', '_', 'B', 'B', '_', '_'], ['_', '_', '_', '_', 'B', 'B'], ['W', 'B', 'W', '_', 'B', '_'], ['_', '_', '_', '_', 'W', 'W'], ['_', 'W', 'W', '_', '_', '_']]))

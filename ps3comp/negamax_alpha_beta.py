@@ -22,9 +22,8 @@ Move = tuple[tuple[int, int], tuple[int, int]]
 
     # Transposition Table (Zobrist Hashing) - Database essentially for Opening and Endgame
 
-def deepBlue(board):
-    transpositionTable = dict()
-    zobristTable = zobrist_hashing.initTable()
+def deepBlue(board, transpositionTable, zobristTable):
+    
     hashValue = zobrist_hashing.computeHash(board, zobristTable) # For init only
 
     start = time.time()

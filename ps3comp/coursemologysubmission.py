@@ -1,4 +1,3 @@
-# import zobrist_hashing
 import utils
 import time
 import sys
@@ -29,6 +28,9 @@ Move = tuple[tuple[int, int], tuple[int, int]]
 
 class PlayerAI:
 
+    transpositionTable = dict()
+    zobristTable = [[[random.randint(0, pow(2, 64)) for k in range(NUM_PIECES)] for j in range(BOARD_LENGTH)] for i in range(BOARD_LENGTH)]
+
     def make_move(self, board) -> Move:
         '''
         This is the function that will be called from main.py
@@ -48,12 +50,14 @@ class PlayerAI:
         The first tuple contains the source position of the black pawn
         to be moved, the second list contains the destination position.
         '''
-        return deepBlue(board)
+        arr = deepBlue(board, self.transpositionTable, self.zobristTable)
+        move = arr[0]
+        self.transpositionTable = arr[1]
+        self.zobristTable = arr[2]
+        return move
         
 
-def deepBlue(board):
-    transpositionTable = dict()
-    zobristTable = initTable()
+def deepBlue(board, transpositionTable, zobristTable):
     hashValue = computeHash(board, zobristTable) # For init only
 
     start = time.time()
@@ -64,7 +68,7 @@ def deepBlue(board):
         if currMove != None:
             bestMove = currMove
         max_depth += 1
-    return bestMove
+    return (bestMove, transpositionTable, zobristTable)
 
 def negamax_alpha_beta(board, depth, max_depth, alpha, beta, transpositionTable, zobristTable, hashValue) -> tuple[Score, Move]:
     v = negamax_alpha_betaCode(board, depth, max_depth, alpha, beta, transpositionTable, zobristTable, hashValue)
@@ -192,10 +196,10 @@ def evaluate(board):
     score = blackEval + whiteEval
     return score
 
-def randomInt():
-    min = 0
-    max = pow(2, 64)
-    return random.randint(min, max)
+# def randomInt():
+#     min = 0
+#     max = pow(2, 64)
+#     return random.randint(min, max)
 
 def indexOf(piece):
     if (piece=='_'):
@@ -203,9 +207,9 @@ def indexOf(piece):
     else:
         return 1
 
-def initTable():
-    ZobristTable = [[[randomInt() for k in range(NUM_PIECES)] for j in range(BOARD_LENGTH)] for i in range(BOARD_LENGTH)]
-    return ZobristTable
+# def initTable():
+#     ZobristTable = [[[randomInt() for k in range(NUM_PIECES)] for j in range(BOARD_LENGTH)] for i in range(BOARD_LENGTH)]
+#     return ZobristTable
 
 def computeHash(board, ZobristTable):
     h = 0

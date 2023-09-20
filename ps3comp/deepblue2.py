@@ -1,8 +1,14 @@
 import negamax_alpha_beta
 # import ids
+import zobrist_hashing
+
+Score = int | float
+Move = tuple[tuple[int, int], tuple[int, int]]
 
 class PlayerAI:
-    
+
+    transpositionTable = dict()
+    zobristTable = zobrist_hashing.initTable()
 
     def make_move(self, board) -> Move:
         '''
@@ -23,4 +29,8 @@ class PlayerAI:
         The first tuple contains the source position of the black pawn
         to be moved, the second list contains the destination position.
         '''
-        return deepBlue(board)
+        arr = deepBlue(board, self.transpositionTable, self.zobristTable)
+        move = arr[0]
+        self.transpositionTable = arr[1]
+        self.zobristTable = arr[2]
+        return move
