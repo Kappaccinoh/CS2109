@@ -1,6 +1,8 @@
 # from negamax_alpha_beta import deepBlue
-import coursemologysubmission
-from coursemologysubmission import PlayerAI
+# import coursemologysubmission
+# from coursemologysubmission import PlayerAI
+import idscoursemology
+from idscoursemology import PlayerAI
 from playerNaive import PlayerNaive
 import utils
 
