@@ -194,10 +194,80 @@ def gradient_descent_one_variable(x, y, lr = 1e-5, number_of_epochs = 250):
     
     return bias, weight, loss
 
+def gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250):
+    '''
+    Approximate bias and weight that gave the best fitting line.
+
+    Parameters
+    ----------
+    X (np.ndarray) : (m, n) numpy matrix representing feature matrix
+    y (np.ndarray) : (m, 1) numpy matrix representing target values
+    lr (float) : Learning rate
+    number_of_epochs (int) : Number of gradient descent epochs
+    
+    Returns
+    -------
+        bias (float):
+            The bias constant
+        weights (np.ndarray):
+            A (n, 1) numpy matrix that specifies the weight constants.
+        loss (list):
+            A list where the i-th element denotes the MSE score at i-th epoch.
+    '''
+    length = len(X)
+    n = len(X[0])
+
+    # Do not change
+    bias = 0
+    # weights.shape = (n, 1) initialised to 0
+    weights = np.full((n, 1), 0).astype(float)
+    loss = []
+
+    # Recall Matrix Multiplication
+    # A x B
+    # A(c,d) and B(d,1)
+    # c - number of samples
+    # d - number of features
+    # e - 1
+
+    for i in range(number_of_epochs):
+        biasMatrix = np.full((length, 1), bias)
+        weightMatrix = np.full((length, n), np.sum(weights, axis=1))
+
+        # updating bias
+        partial = np.sum(biasMatrix + np.sum(weightMatrix * X, axis=1).reshape(length,1) - y) / length
+        newBias = bias - lr * partial
+
+        # updating weights
+        hw = biasMatrix + np.sum(weightMatrix * X, axis=1).reshape(length,1) - y
+        tempCoeff = np.repeat(weights, length, axis=1)
+        partial = np.matmul(tempCoeff, hw) / length
+        newWeight = weights - lr * partial
+
+        bias = newBias
+        weights = newWeight
+
+        '''
+        y_true (np.ndarray) : (m, 1) numpy matrix consists of target value
+        y_pred (np.ndarray) : (m, 1) numpy matrix consists of prediction
+        '''
+        y_predicted = np.full((length, 1), 0)
+        biasMatrix = np.full((length, 1), bias)
+        weightMatrix = np.full((length, n), np.sum(weights, axis=1))
+
+        y_predicted = y_predicted + biasMatrix + np.sum(weightMatrix * X, axis=1).reshape(length,1)
+        print(y_predicted)
+        print(y)
+        y_true = y
+        mseScore = mean_squared_error(y_true, y_predicted)
+        loss.append(mseScore)
+    
+    return bias, weights, loss
+
 
 if __name__ == "__main__":
-    X, y = np.array([[1], [2], [3]]), np.arange(4, 7).reshape((-1, 1))
-    gradient_descent_one_variable(X, y, lr = 1e-5, number_of_epochs = 250)[2][0] > gradient_descent_one_variable(X, y, lr = 1e-5, number_of_epochs = 250)[2][-1]    
+    # X, y = np.array([[1], [2], [3]]), np.arange(4, 7).reshape((-1, 1))
+    # gradient_descent_one_variable(X, y, lr = 1e-5, number_of_epochs = 250)[2][0] > gradient_descent_one_variable(X, y, lr = 1e-5, number_of_epochs = 250)[2][-1]    
 
     # import matplotlib.pyplot as plt
 
@@ -207,3 +277,14 @@ if __name__ == "__main__":
     # plt.xlabel('Epoch number')
     # plt.ylabel('Loss')
     # plt.show()
+    X = [
+        [1,2,3,4,5],
+        [2,3,4,5,6],
+        [7,8,9,10,11]
+    ]
+    y = [
+        [3],
+        [4],
+        [9]
+    ]
+    gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250)
