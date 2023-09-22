@@ -244,7 +244,6 @@ def gradient_descent_multi_variable(X, y, lr = 1e-5, number_of_epochs = 250):
         y_true = np.array(y)
         mseScore = mean_squared_error(y_true, y_predicted)
         loss.append(mseScore)
-        print(mseScore)
     
     return bias, weights, loss
 
@@ -310,6 +309,68 @@ def feature_scaling(X):
 
     a = (X - meanMatrix) / stdMatrix
     return a
+
+def find_number_of_epochs(X, y, lr, delta_loss):
+    '''
+    Do gradient descent until convergence and return number of epochs
+    required.
+
+    Parameters
+    ----------
+    X (np.ndarray) : (m, n) numpy matrix representing feature matrix
+    y (np.ndarray) : (m, 1) numpy matrix representing target values
+    lr (float) : Learning rate
+    delta_loss (float) : Termination criterion
+    
+    Returns
+    -------
+        bias (float):
+            The bias constant
+        weights (np.ndarray):
+            A (n, 1) numpy matrix that specifies the weight constants.
+        num_of_epochs (int):
+            Number of epochs to reach convergence.
+        current_loss (float):
+            The loss value obtained after convergence.
+    '''
+    # Do not change
+    bias = 0
+    weights = np.full((X.shape[1], 1), 0).astype(float)
+    num_of_epochs = 0
+    previous_loss = 1e14
+    current_loss = -1e14
+    
+    length = len(X)
+    n = len(X[0])
+
+    while abs(previous_loss - current_loss) >= delta_loss:
+        # updating bias
+        biasMatrix = np.full((length, 1), bias)
+        partial = np.sum(biasMatrix + np.sum(np.matmul(X, weights), axis=1).reshape(length, 1) - y) / length
+        newBias = bias - lr * partial
+
+        partial0 = biasMatrix + np.sum(np.matmul(X, weights), axis=1).reshape(length, 1) - y
+        partial1 = np.matmul(np.array(X).transpose(), partial0) / length
+        newWeight = weights - lr * partial1
+
+        bias = newBias
+        weights = newWeight
+        '''
+        y_true (np.ndarray) : (m, 1) numpy matrix consists of target value
+        y_pred (np.ndarray) : (m, 1) numpy matrix consists of prediction
+        '''
+        y_predicted = np.full((length, 1), 0)
+        biasMatrix = np.full((length, 1), bias)
+        y_predicted = y_predicted + biasMatrix + np.matmul(X, weights)
+        y_true = np.array(y)
+        mseScore = mean_squared_error(y_true, y_predicted)
+
+        previous_loss = current_loss
+        current_loss = mseScore
+        num_of_epochs += 1
+    
+    return bias, weights, num_of_epochs, current_loss
+
 
 if __name__ == "__main__":
     X = [
