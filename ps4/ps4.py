@@ -339,7 +339,7 @@ def find_number_of_epochs(X, y, lr, delta_loss):
     num_of_epochs = 0
     previous_loss = 1e14
     current_loss = -1e14
-    
+
     length = len(X)
     n = len(X[0])
 
@@ -373,11 +373,14 @@ def find_number_of_epochs(X, y, lr, delta_loss):
 
 
 if __name__ == "__main__":
-    X = [
-        [4,5,2,3,4],
-        [2,3,4,5,6],
-        [4,5,6,7,8],
-        [3,7,2,2,6]
-    ]
+    data_filepath = 'housing_data.csv'
+    X, y = load_data(data_filepath)
+    schools = X[:,2]
+    poly = create_polynomial_matrix(X, 3)
+    
+    # poly = feature_scaling(X)
+    
+    lr = 1e-3
+    print(find_number_of_epochs(poly,y, lr, 1e7)[2])
 
-    feature_scaling(X)
+    
