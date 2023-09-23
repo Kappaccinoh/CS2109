@@ -12,13 +12,12 @@ board = (
 (3, 4, 5, 2, 8, 6, 1, 7, 9))
 
 def easy_sudoku(x, y, n):
-    print(len(board))
-    for i in range(1, SIZE + 1):
-        if board[y][i] == n:
+    for i in range(0, SIZE):
+        if board[x - 1][i] == n:
             return "Violation" 
 
-    for i in range(1, SIZE + 1):
-        if board[i][x] == n:
+    for i in range(0, SIZE):
+        if board[i][y - 1] == n:
             return "Violation"
 
     return "No violation"
