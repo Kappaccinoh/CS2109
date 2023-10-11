@@ -89,23 +89,59 @@ def train_test_split(X: np.ndarray, y: np.ndarray, test_size: float=0.25):
     m = X.shape[0] # number of features
     k = int(m * test_size)
 
-    total = pd.concat([X, y], axis=0)
+    df = np.column_stack((X, y))
+    df = pd.DataFrame(df)
 
+    trainSample = df.sample(frac = 1 - test_size)
+    testSample = df.drop(trainSample.index)
+
+    y_train = trainSample[trainSample.columns[-1]]
+    X_train = trainSample[trainSample.columns[:-1]] 
+
+    y_test = testSample[testSample.columns[-1]]
+    X_test = testSample[testSample.columns[:-1]] 
+
+    return (X_train, X_test, y_train, y_test)
+
+# 3.1 Cost Function
+def cost_function(X: np.ndarray, y: np.ndarray, weight_vector: np.ndarray):
+    '''
+    Cross entropy error for logistic regression
+
+    Parameters
+    ----------
+    X: np.ndarray
+        (m, n) training dataset (features).
+    y: np.ndarray
+        (m,) training dataset (corresponding targets).
+    weight_vector: np.ndarray
+        (n,) weight parameters.
+
+    Returns
+    -------
+    Cost
+    '''
+    
+    # Machine epsilon for numpy `float64` type
+    eps = np.finfo(np.float64).eps
+
+    
 
 
 if __name__ == "__main__":
-    dirname = os.getcwd()
-    credit_card_data_filepath = os.path.join(dirname, 'credit_card_small.csv')
-    restaurant_data_filepath = os.path.join(dirname, 'restaurant_data.csv')
+    data1 = [[111.1, 10, 0], [111.2, 20, 0], [111.3, 30, 0], [111.4, 40, 0], [111.5, 50, 0], [111.6, 60, 1],
+        [111.7, 70, 0], [111.8, 80, 1], [111.9, 90, 1]]
+    df1 = pd.DataFrame(data1, columns = ['V1', 'V2', 'Class'])
+    X1 = df1.iloc[:, :-1].to_numpy()
+    y1 = df1.iloc[:, -1].to_numpy()
+    expected1 = [7, 2, 7, 2]
 
-    credit_df = pd.read_csv(credit_card_data_filepath)
-    credit_df = np.array(credit_df)
+    X1_train, X1_test, y1_train, y1_test = train_test_split(X1, y1, test_size=0.25)
 
-    X = credit_df[:, :-1]
-    y = credit_df[:, -1:]
-    print(X)
+    assert len(X1_train) == expected1[0] and\
+    len(X1_test) == expected1[1] and\
+    len(y1_train) == expected1[2] and\
+    len(y1_test) == expected1[3]
 
-    res = pd.concat([X, y], axis=0)
-
-    print(res)
+    
     
