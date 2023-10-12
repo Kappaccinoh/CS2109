@@ -125,6 +125,10 @@ def cost_function(X: np.ndarray, y: np.ndarray, weight_vector: np.ndarray):
     # Machine epsilon for numpy `float64` type
     eps = np.finfo(np.float64).eps
 
+    weight_vector = 
+    weightX_vector = np.multiply(X, weight_vector)
+
+
     
 
 
