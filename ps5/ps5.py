@@ -125,30 +125,75 @@ def cost_function(X: np.ndarray, y: np.ndarray, weight_vector: np.ndarray):
     # Machine epsilon for numpy `float64` type
     eps = np.finfo(np.float64).eps
 
-    yPredVector = np.multiply(X, weight_vector) + eps
-    errorVector = -y * log(yPredVector) - (1 - y) * log(1 - yPredVector)
-    print(errorVector)
+    numDataPoints = len(X)
+    yPredVector = np.matmul(X, weight_vector)
+    ySigmoidVector = 1 / (1 + np.exp(-1 * yPredVector))
+    errorVector = -y * np.log(ySigmoidVector + eps) - (1 - y) * np.log(1 - ySigmoidVector + eps)
 
-    return sum(errorVector) / m
+    return np.sum(errorVector) / numDataPoints
 
+# 3.2 Weight Update
+def weight_update(X: np.ndarray, y: np.ndarray, alpha: np.float64, weight_vector: np.ndarray) -> np.ndarray:
+    '''
+    Do the weight update for one step in gradient descent
 
+    Parameters
+    ----------
+    X: np.ndarray
+        (m, n) training dataset (features).
+    y: np.ndarray
+        (m,) training dataset (corresponding targets).
+    alpha: np.float64
+        logistic regression learning rate.
+    weight_vector: np.ndarray
+        (n,) weight parameters.
+
+    Returns
+    -------
+    New weight vector after one round of update.
+    '''
+    n = len(X)
+
+    yPredVector = np.dot(X, weight_vector)
+    ySigmoidVector = 1 / (1 + np.exp(-1 * yPredVector))
+    diffVector = ySigmoidVector - y
+    partialVector = alpha * np.dot(np.transpose(X), diffVector) / n
+    weight_vector -= partialVector
+
+    return weight_vector
     
+# 3.3 Logistic regression classification
+def logistic_regression_classification(X: np.ndarray, weight_vector: np.ndarray, prob_threshold: np.float64=0.5):
+    '''
+    Do classification task using logistic regression.
+
+    Parameters
+    ----------
+    X: np.ndarray
+        (m, n) training dataset (features).
+    weight_vector: np.ndarray
+        (n,) weight parameters.
+    prob_threshold: np.float64
+        the threshold for a prediction to be considered fraudulent.
+
+    Returns
+    -------
+    Classification result as an (m,) np.ndarray
+    '''
+
+    # TODO: add your solution here and remove `raise NotImplementedError`
+    raise NotImplementedError
+
 
 
 if __name__ == "__main__":
-    data1 = [[111.1, 10, 0], [111.2, 20, 0], [111.3, 30, 0], [111.4, 40, 0], [111.5, 50, 0], [111.6, 60, 1],
-        [111.7, 70, 0], [111.8, 80, 1], [111.9, 90, 1]]
+    data1 = [[111.1, 10, 0], [111.2, 20, 0], [111.3, 10, 0], [111.4, 10, 0], [111.5, 10, 0], [111.6, 10, 1],[111.4, 10, 0], [111.5, 10, 1], [111.6, 10, 1]]
     df1 = pd.DataFrame(data1, columns = ['V1', 'V2', 'Class'])
     X1 = df1.iloc[:, :-1].to_numpy()
     y1 = df1.iloc[:, -1].to_numpy()
-    expected1 = [7, 2, 7, 2]
+    w1 = np.transpose([2.2000, 12.20000])
+    a1 = 1e-5
+    nw1 = np.array([2.199,12.2])
 
-    X1_train, X1_test, y1_train, y1_test = train_test_split(X1, y1, test_size=0.25)
-
-    assert len(X1_train) == expected1[0] and\
-    len(X1_test) == expected1[1] and\
-    len(y1_train) == expected1[2] and\
-    len(y1_test) == expected1[3]
-
-    
-    
+    assert np.array_equal(np.round(weight_update(X1, y1, a1, w1), 3), nw1)
+        
