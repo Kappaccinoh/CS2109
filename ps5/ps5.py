@@ -212,23 +212,85 @@ def logistic_regression_batch_gradient_descent(X_train: np.ndarray, y_train: np.
     -------
     The final (n,) weight parameters
     '''
+    epoch = 0
+    weight_vector = np.array([0])
+    weight_vector = np.repeat(weight_vector, len(X_train[0]))
+    error = cost_function(X_train, y_train, weight_vector)
+
+    while (True):
+        weight_vector = weight_update(X_train, y_train, alpha, weight_vector)
+        error = cost_function(X_train, y_train, weight_vector)
+        epoch += 1
+        if (epoch >= max_num_epochs or error < threshold):
+            break
+        
+    return weight_vector
+
+# Task 3.5 Logistic Regression Using Stochastic Gradient Descent
+def weight_update_stochastic(X: np.ndarray, y: np.ndarray, alpha: np.float64, weight_vector: np.ndarray) -> np.ndarray:
+    '''
+    Do the weight update for one step in gradient descent.
+
+    Parameters
+    ----------
+    X: np.ndarray
+        (1, n) training dataset (features).
+    y: np.ndarray
+        one y in training dataset (corresponding targets).
+    alpha: np.float64
+        logistic regression learning rate.
+    weight_vector: np.ndarray
+        (n, 1) vector of weight parameters.
+
+    Returns
+    -------
+    New (n,) weight parameters after one round of update.
+    '''
 
     # TODO: add your solution here and remove `raise NotImplementedError`
     raise NotImplementedError
 
+# Task 3.5 Continued
+def logistic_regression_stochastic_gradient_descent(X_train: np.ndarray, y_train: np.ndarray, max_num_iterations: int=250, threshold: np.float64=0.05, alpha: np.float64=1e-5) -> np.ndarray:
+    '''
+    Initialize your weight to zeros. Write a terminating condition, and run the weight update for some iterations.
+    Get the resulting weight vector.
+
+    Parameters
+    ----------
+    X_train: np.ndarray
+        (m, n) training dataset (features).
+    y_train: np.ndarray
+        (m,) training dataset (corresponding targets).
+    max_num_iterations: int
+        this should be one of the terminating conditions. 
+        The gradient descent step should happen at most max_num_iterations times.
+    threshold: np.float64
+        terminating when error <= threshold value, or if you reach the max number of update rounds first.
+    alpha: np.float64
+        logistic regression learning rate.
+
+    Returns
+    -------
+    The final (n,) weight parameters
+    '''
+    epoch = 0
+    weight_vector = np.array([0])
+    weight_vector = np.repeat(weight_vector, len(X_train[0]))
+    error = cost_function(X_train, y_train, weight_vector)
+
+    while (True):
+        weight_vector = weight_update(X_train, y_train, alpha, weight_vector)
+        error = cost_function(X_train, y_train, weight_vector)
+        epoch += 1
+        if (epoch >= max_num_epochs or error < threshold):
+            break
+        
+    return weight_vector
+
 
 
 if __name__ == "__main__":
-    data1 = [[111.1, 10, 0], [111.2, 20, 0], [111.3, 10, 0], [111.4, 10, 0], [111.5, 10, 0], [211.6, 80, 1],[111.4, 10, 0], [111.5, 80, 1], [211.6, 80, 1]]
-    df1 = pd.DataFrame(data1, columns = ['V1', 'V2', 'Class'])
-    X1 = df1.iloc[:, :-1].to_numpy()
-    y1 = df1.iloc[:, -1].to_numpy()
-    w1 = np.transpose([-0.000002, 0.000003])
-    expected1 = np.transpose([0, 0, 0, 0, 0, 0, 0, 1, 0])
-    result1 = logistic_regression_classification(X1, w1)
-    print(result1)
-    print(expected1)
-
-
-    assert result1.shape == expected1.shape and (result1 == expected1).all()
+    weight_vector = np.array([0])
+    weight_vector = np.repeat(weight_vector, 5)
         
