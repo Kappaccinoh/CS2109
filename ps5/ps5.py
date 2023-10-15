@@ -180,6 +180,38 @@ def logistic_regression_classification(X: np.ndarray, weight_vector: np.ndarray,
     -------
     Classification result as an (m,) np.ndarray
     '''
+    yPredVector = np.matmul(X, weight_vector)
+    diffVector = 1 / (1 + np.exp(-1 * yPredVector))
+    diffVector[diffVector > prob_threshold] = 1
+    diffVector[diffVector <= prob_threshold] = 0
+
+    return diffVector
+
+# 3.4 Logistic Regression Using Batch Descent
+def logistic_regression_batch_gradient_descent(X_train: np.ndarray, y_train: np.ndarray, max_num_epochs: int = 250, threshold: np.float64 = 0.05, alpha: np.float64 = 1e-5):
+    '''
+    Initialize your weight to zeros. Write your terminating condition, and run the weight update for some iterations.
+    Get the resulting weight vector. Use that to do predictions, and output the final weight vector.
+
+    Parameters
+    ----------
+    X_train: np.ndarray
+        (m, n) training dataset (features).
+    y_train: np.ndarray
+        (m,) training dataset (corresponding targets).
+    max_num_epochs: int
+        this should be one of the terminating conditions. 
+        That means if you initialize num_update_rounds to 0, 
+        then you should stop updating the weights when num_update_rounds >= max_num_epochs.
+    threshold: np.float64
+        terminating when error <= threshold value, or if you reach the max number of update rounds first.
+    alpha: np.float64
+        logistic regression learning rate.
+
+    Returns
+    -------
+    The final (n,) weight parameters
+    '''
 
     # TODO: add your solution here and remove `raise NotImplementedError`
     raise NotImplementedError
@@ -187,13 +219,16 @@ def logistic_regression_classification(X: np.ndarray, weight_vector: np.ndarray,
 
 
 if __name__ == "__main__":
-    data1 = [[111.1, 10, 0], [111.2, 20, 0], [111.3, 10, 0], [111.4, 10, 0], [111.5, 10, 0], [111.6, 10, 1],[111.4, 10, 0], [111.5, 10, 1], [111.6, 10, 1]]
+    data1 = [[111.1, 10, 0], [111.2, 20, 0], [111.3, 10, 0], [111.4, 10, 0], [111.5, 10, 0], [211.6, 80, 1],[111.4, 10, 0], [111.5, 80, 1], [211.6, 80, 1]]
     df1 = pd.DataFrame(data1, columns = ['V1', 'V2', 'Class'])
     X1 = df1.iloc[:, :-1].to_numpy()
     y1 = df1.iloc[:, -1].to_numpy()
-    w1 = np.transpose([2.2000, 12.20000])
-    a1 = 1e-5
-    nw1 = np.array([2.199,12.2])
+    w1 = np.transpose([-0.000002, 0.000003])
+    expected1 = np.transpose([0, 0, 0, 0, 0, 0, 0, 1, 0])
+    result1 = logistic_regression_classification(X1, w1)
+    print(result1)
+    print(expected1)
 
-    assert np.array_equal(np.round(weight_update(X1, y1, a1, w1), 3), nw1)
+
+    assert result1.shape == expected1.shape and (result1 == expected1).all()
         
