@@ -154,11 +154,19 @@ def weight_update(X: np.ndarray, y: np.ndarray, alpha: np.float64, weight_vector
     '''
     n = len(X)
 
-    yPredVector = np.dot(X, weight_vector)
-    ySigmoidVector = 1 / (1 + np.exp(-1 * yPredVector))
-    diffVector = ySigmoidVector - y
-    partialVector = alpha * np.dot(np.transpose(X), diffVector) / n
-    weight_vector = weight_vector - partialVector
+    # yPredVector = np.dot(X, weight_vector)
+    # ySigmoidVector = 1 / (1 + np.exp(-1 * yPredVector))
+    # diffVector = ySigmoidVector - y
+    # partialVector = alpha * np.dot(np.transpose(X), diffVector) / n
+    # partialVector = np.transpose(partialVector)
+    # weight_vector = weight_vector - partialVector
+    # print(weight_vector.shape)
+
+    partial0 = np.sum(np.matmul(X, weight_vector), axis=0)
+    partial0 = 1 / (1 + np.exp(-1 * partial0))
+    partial0 = partial0 - y
+    partial1 = np.matmul(np.array(X).transpose(), partial0) / n
+    weight_vector = weight_vector - alpha * partial1
 
     return weight_vector
     
@@ -306,8 +314,54 @@ def logistic_regression_stochastic_gradient_descent(X_train: np.ndarray, y_train
 import matplotlib.pyplot as plt
 from time import time
 
-# X_sample, y_sample = 
-# num_interations = 
+# Plot 1 - Plot of cross entropy loss against number of update rounds
+
+# dirname = os.getcwd()
+# credit_card_data_filepath = os.path.join(dirname, 'credit_card_medium.csv')
+
+# credit_df = pd.read_csv(credit_card_data_filepath)
+# X = credit_df.values[:, :-1]
+# y = credit_df.values[:, -1:]
+
+# X_sample, y_sample = X, y
+# num_interations = 2000
+# batch_rounds = []
+# batch_costs = []
+
+# for i in range(50, num_interations + 1, 50):
+#     weight_vector = logistic_regression_batch_gradient_descent(X_sample, y_sample, i, 0, 1e-5)
+#     batch_rounds.append(i)
+#     batch_costs.append(cost_function(X_sample, y_sample, weight_vector))
+# plt.plot(batch_rounds, batch_costs, 'g^', label="Batch Gradient Descent")
+
+# stochastic_rounds = []
+# stochastic_costs = []
+# for i in range(50, num_interations + 1, 50):
+#     weight_vector = logistic_regression_stochastic_gradient_descent(X_sample, y_sample, i, 0, 1e-5)
+#     stochastic_rounds.append(i)
+#     stochastic_costs.append(cost_function(X_sample, y_sample, weight_vector))
+# plt.plot(stochastic_rounds, stochastic_costs, 'bs', label="Stochastic Gradient Descent")
+
+# plt.xlabel('Number of update rounds')
+# plt.ylabel('Cross Entropy Loss')
+# plt.legend()
+# plt.title('Plot of cross entropy loss against number of update rounds')
+
+# plt.show()
+
+
+
+# Plot 2 - Plot of cross entropy loss against runtime (sec)
+
+# dirname = os.getcwd()
+# credit_card_data_filepath = os.path.join(dirname, 'credit_card_medium.csv')
+
+# credit_df = pd.read_csv(credit_card_data_filepath)
+# X = credit_df.values[:, :-1]
+# y = credit_df.values[:, -1:]
+
+# X_sample, y_sample = X, y
+# num_interations = 2000
 # batch_times = []
 # batch_costs = []
 
@@ -336,48 +390,8 @@ from time import time
 
 # plt.show()
 
+# Task 3.7
+
 
 if __name__ == "__main__":
-    dirname = os.getcwd()
-    credit_card_data_filepath = os.path.join(dirname, 'credit_card_medium.csv')
-
-    credit_df = pd.read_csv(credit_card_data_filepath)
-    X = credit_df.values[:, :-1]
-    y = credit_df.values[:, -1:]
-
-    X_sample, y_sample = X, y
-    num_interations = 500
-    batch_times = []
-    batch_costs = []
-
     print("hi")
-
-    for i in range(50, num_interations + 1, 50):
-        start = time()
-        weight_vector = logistic_regression_batch_gradient_descent(X_sample, y_sample, i, 0, 1e-5)
-        stop = time()
-        batch_times.append(stop - start)
-        batch_costs.append(cost_function(X_sample, y_sample, weight_vector))
-    plt.plot(batch_times, batch_costs, 'g^', label="Batch Gradient Descent")
-
-    print("yo")
-
-    stochastic_times = []
-    stochastic_costs = []
-    for i in range(50, num_interations + 1, 50):
-        start = time()
-        weight_vector = logistic_regression_stochastic_gradient_descent(X_sample, y_sample, i, 0, 1e-5)
-        stop = time()
-        stochastic_times.append(stop - start)
-        stochastic_costs.append(cost_function(X_sample, y_sample, weight_vector))
-    plt.plot(stochastic_times, stochastic_costs, 'bs', label="Stochastic Gradient Descent")
-
-    print(batch_costs)
-    print(batch_times)
-
-    plt.xlabel('Runtime (sec)')
-    plt.ylabel('Cross Entropy Loss')
-    plt.legend()
-    plt.title('Plot of cross entropy loss against runtime (sec)')
-
-    plt.show()
