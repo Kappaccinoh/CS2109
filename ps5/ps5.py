@@ -253,7 +253,7 @@ def weight_update_stochastic(X: np.ndarray, y: np.ndarray, alpha: np.float64, we
     -------
     New (n,) weight parameters after one round of update.
     '''
-    n = len(X)
+    n = X.shape[1]
 
     yPredVector = np.dot(X, weight_vector)
     ySigmoidVector = 1 / (1 + np.exp(-1 * yPredVector))
@@ -262,7 +262,15 @@ def weight_update_stochastic(X: np.ndarray, y: np.ndarray, alpha: np.float64, we
 
     weight_vector = weight_vector - partialVector
     return weight_vector
-    
+
+    # partial0 = np.sum(np.matmul(X, weight_vector), axis=0)
+    # partial0 = 1 / (1 + np.exp(-1 * partial0))
+    # partial0 = partial0 - y
+    # partial1 = np.matmul(np.array(X).reshape(1,n).transpose(), partial0) / n
+    # weight_vector = weight_vector - alpha * partial1
+
+    # return weight_vector
+
 
 # Task 3.5 Continued
 def logistic_regression_stochastic_gradient_descent(X_train: np.ndarray, y_train: np.ndarray, max_num_iterations: int=250, threshold: np.float64=0.05, alpha: np.float64=1e-5) -> np.ndarray:
@@ -288,14 +296,16 @@ def logistic_regression_stochastic_gradient_descent(X_train: np.ndarray, y_train
     -------
     The final (n,) weight parameters
     '''
-    m = len(X_train)
-    n = len(X_train[0])
+    m = X_train.shape[0]
+    n = X_train.shape[1]
     epoch = 0
-    weight_vector = np.array([0])
-    weight_vector = np.repeat(weight_vector, len(X_train[0]))
+    weight_vector = np.zeros(n)
     error = cost_function(X_train, y_train, weight_vector)
 
     while (True):
+        if (epoch >= max_num_iterations or error <= threshold):
+            break
+        
         # Select one random entry from X_train to pass on to weight_update_stochastic
         randChoice = np.random.randint(0, m)
         tempX = X_train[randChoice].reshape([1, n])
@@ -303,9 +313,6 @@ def logistic_regression_stochastic_gradient_descent(X_train: np.ndarray, y_train
         weight_vector = weight_update_stochastic(tempX, tempY, alpha, weight_vector)
         error = cost_function(X_train, y_train, weight_vector)
         epoch += 1
-
-        if (epoch >= max_num_iterations or error < threshold):
-            break
     
     return weight_vector
 
@@ -443,4 +450,5 @@ if __name__ == "__main__":
     y = restaurant_df.values[:, -1:]
 
     # multi_class_logistic_regression_batch_gradient_descent(X, y, 250, 0.4, 0.5, 'some')
-    print(train_test_split(X,y,0.25))
+    ans = logistic_regression_stochastic_gradient_descent(X,y)
+    print(ans)
