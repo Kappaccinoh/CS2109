@@ -89,17 +89,16 @@ def train_test_split(X: np.ndarray, y: np.ndarray, test_size: float=0.25):
     m = X.shape[0] # number of features
     k = int(m * test_size)
 
-    df = np.column_stack((X, y))
-    df = pd.DataFrame(df)
+    shuffled_indices = np.random.permutation(m)
+    X_labels_shuffled = X[shuffled_indices]
+    y_labels_shuffled = y[shuffled_indices]
 
-    trainSample = df.sample(frac = 1 - test_size)
-    testSample = df.drop(trainSample.index)
+    y_train = y_labels_shuffled[: m - k]
+    X_train = X_labels_shuffled[: m - k]
 
-    y_train = trainSample[trainSample.columns[-1]]
-    X_train = trainSample[trainSample.columns[:-1]] 
+    y_test = y_labels_shuffled[m - k : m]
+    X_test = X_labels_shuffled[m - k : m] 
 
-    y_test = testSample[testSample.columns[-1]]
-    X_test = testSample[testSample.columns[:-1]] 
 
     return (X_train, X_test, y_train, y_test)
 
@@ -443,4 +442,5 @@ if __name__ == "__main__":
     X = restaurant_df.values[:, :-1]
     y = restaurant_df.values[:, -1:]
 
-    multi_class_logistic_regression_batch_gradient_descent(X, y, 250, 0.4, 0.5, 'some')
+    # multi_class_logistic_regression_batch_gradient_descent(X, y, 250, 0.4, 0.5, 'some')
+    print(train_test_split(X,y,0.25))
