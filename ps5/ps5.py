@@ -126,7 +126,8 @@ def cost_function(X: np.ndarray, y: np.ndarray, weight_vector: np.ndarray):
 
     numDataPoints = len(X)
     yPredVector = np.matmul(X, weight_vector)
-    ySigmoidVector = 1 / (1 + np.exp(-1 * yPredVector))
+    temp = -1 * yPredVector
+    ySigmoidVector = 1 / (1 + np.exp(temp))
     errorVector = -y * np.log(ySigmoidVector + eps) - (1 - y) * np.log(1 - ySigmoidVector + eps)
 
     return np.sum(errorVector) / numDataPoints
@@ -429,8 +430,11 @@ def multi_class_logistic_regression_batch_gradient_descent(X_train: np.ndarray, 
 
     # X_train_New = df.values[:, :-1]
     # y_train_New = df.values[:, -1:]
+    m = X_train.shape[0]
+    n = X_train.shape[1]
 
-    combinedArray = np.concatenate([X_train, y_train], axis=1)
+    y_train = y_train.reshape(m,1)
+    combinedArray = np.hstack((X_train, y_train))
     m = len(combinedArray)
     n = len(combinedArray[0])
     combinedArray[:, -1:][combinedArray[:, -1:] != class_i] = 0
@@ -438,6 +442,9 @@ def multi_class_logistic_regression_batch_gradient_descent(X_train: np.ndarray, 
     X_train_New = combinedArray[:, :-1]
     y_train_New = combinedArray[:, -1:]
     y_train_New = y_train_New.flatten()
+
+    X_train_New = np.asarray(X_train_New, float)
+    y_train_New = np.asarray(y_train_New, float)
 
     return logistic_regression_batch_gradient_descent(X_train_New, y_train_New, max_num_epochs, threshold, alpha)
 
@@ -450,5 +457,5 @@ if __name__ == "__main__":
     y = restaurant_df.values[:, -1:]
 
     # multi_class_logistic_regression_batch_gradient_descent(X, y, 250, 0.4, 0.5, 'some')
-    ans = logistic_regression_stochastic_gradient_descent(X,y)
+    ans = multi_class_logistic_regression_batch_gradient_descent(X,y, 250,0.5,1e-5,'some')
     print(ans)
