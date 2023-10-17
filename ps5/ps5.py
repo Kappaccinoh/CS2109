@@ -158,7 +158,7 @@ def weight_update(X: np.ndarray, y: np.ndarray, alpha: np.float64, weight_vector
     ySigmoidVector = 1 / (1 + np.exp(-1 * yPredVector))
     diffVector = ySigmoidVector - y
     partialVector = alpha * np.dot(np.transpose(X), diffVector) / n
-    weight_vector -= partialVector
+    weight_vector = weight_vector - partialVector
 
     return weight_vector
     
@@ -246,9 +246,16 @@ def weight_update_stochastic(X: np.ndarray, y: np.ndarray, alpha: np.float64, we
     -------
     New (n,) weight parameters after one round of update.
     '''
+    n = len(X)
 
-    # TODO: add your solution here and remove `raise NotImplementedError`
-    raise NotImplementedError
+    yPredVector = np.dot(X, weight_vector)
+    ySigmoidVector = 1 / (1 + np.exp(-1 * yPredVector))
+    diffVector = ySigmoidVector - y
+    partialVector = alpha * np.dot(np.transpose(X), diffVector) / n
+
+    weight_vector = weight_vector - partialVector
+    return weight_vector
+    
 
 # Task 3.5 Continued
 def logistic_regression_stochastic_gradient_descent(X_train: np.ndarray, y_train: np.ndarray, max_num_iterations: int=250, threshold: np.float64=0.05, alpha: np.float64=1e-5) -> np.ndarray:
@@ -274,23 +281,103 @@ def logistic_regression_stochastic_gradient_descent(X_train: np.ndarray, y_train
     -------
     The final (n,) weight parameters
     '''
+    m = len(X_train)
+    n = len(X_train[0])
     epoch = 0
     weight_vector = np.array([0])
     weight_vector = np.repeat(weight_vector, len(X_train[0]))
     error = cost_function(X_train, y_train, weight_vector)
 
     while (True):
-        weight_vector = weight_update(X_train, y_train, alpha, weight_vector)
+        # Select one random entry from X_train to pass on to weight_update_stochastic
+        randChoice = np.random.randint(0, m)
+        tempX = X_train[randChoice].reshape([1, n])
+        tempY = y_train[randChoice]
+        weight_vector = weight_update_stochastic(tempX, tempY, alpha, weight_vector)
         error = cost_function(X_train, y_train, weight_vector)
         epoch += 1
-        if (epoch >= max_num_epochs or error < threshold):
+
+        if (epoch >= max_num_iterations or error < threshold):
             break
-        
+    
     return weight_vector
 
+# Task 3.6 Graph Plotting
+import matplotlib.pyplot as plt
+from time import time
+
+# X_sample, y_sample = 
+# num_interations = 
+# batch_times = []
+# batch_costs = []
+
+# for i in range(50, num_interations + 1, 50):
+#     start = time()
+#     weight_vector = logistic_regression_batch_gradient_descent(X_sample, y_sample, i, 0, 1e-5)
+#     stop = time()
+#     batch_times.append(stop - start)
+#     batch_costs.append(cost_function(X_sample, y_sample, weight_vector))
+# plt.plot(batch_times, batch_costs, 'g^', label="Batch Gradient Descent")
+
+# stochastic_times = []
+# stochastic_costs = []
+# for i in range(50, num_interations + 1, 50):
+#     start = time()
+#     weight_vector = logistic_regression_stochastic_gradient_descent(X_sample, y_sample, i, 0, 1e-5)
+#     stop = time()
+#     stochastic_times.append(stop - start)
+#     stochastic_costs.append(cost_function(X_sample, y_sample, weight_vector))
+# plt.plot(stochastic_times, stochastic_costs, 'bs', label="Stochastic Gradient Descent")
+
+# plt.xlabel('Runtime (sec)')
+# plt.ylabel('Cross Entropy Loss')
+# plt.legend()
+# plt.title('Plot of cross entropy loss against runtime (sec)')
+
+# plt.show()
 
 
 if __name__ == "__main__":
-    weight_vector = np.array([0])
-    weight_vector = np.repeat(weight_vector, 5)
-        
+    dirname = os.getcwd()
+    credit_card_data_filepath = os.path.join(dirname, 'credit_card_medium.csv')
+
+    credit_df = pd.read_csv(credit_card_data_filepath)
+    X = credit_df.values[:, :-1]
+    y = credit_df.values[:, -1:]
+
+    X_sample, y_sample = X, y
+    num_interations = 500
+    batch_times = []
+    batch_costs = []
+
+    print("hi")
+
+    for i in range(50, num_interations + 1, 50):
+        start = time()
+        weight_vector = logistic_regression_batch_gradient_descent(X_sample, y_sample, i, 0, 1e-5)
+        stop = time()
+        batch_times.append(stop - start)
+        batch_costs.append(cost_function(X_sample, y_sample, weight_vector))
+    plt.plot(batch_times, batch_costs, 'g^', label="Batch Gradient Descent")
+
+    print("yo")
+
+    stochastic_times = []
+    stochastic_costs = []
+    for i in range(50, num_interations + 1, 50):
+        start = time()
+        weight_vector = logistic_regression_stochastic_gradient_descent(X_sample, y_sample, i, 0, 1e-5)
+        stop = time()
+        stochastic_times.append(stop - start)
+        stochastic_costs.append(cost_function(X_sample, y_sample, weight_vector))
+    plt.plot(stochastic_times, stochastic_costs, 'bs', label="Stochastic Gradient Descent")
+
+    print(batch_costs)
+    print(batch_times)
+
+    plt.xlabel('Runtime (sec)')
+    plt.ylabel('Cross Entropy Loss')
+    plt.legend()
+    plt.title('Plot of cross entropy loss against runtime (sec)')
+
+    plt.show()
