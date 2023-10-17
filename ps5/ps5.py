@@ -417,17 +417,23 @@ def multi_class_logistic_regression_batch_gradient_descent(X_train: np.ndarray, 
     -------
     The final (n,) weight parameters
     '''
-    df = pd.DataFrame(np.concatenate((X_train, y_train), axis=1), columns=['max_capcity', 'feedback_score', 'average_expense', 'occupancy'])
-    target = df[df['occupancy'] == class_i]
-    remaining = df[df['occupancy'] != class_i]
+    # df = pd.DataFrame(np.concatenate((X_train, y_train), axis=1), columns=['max_capcity', 'feedback_score', 'average_expense', 'occupancy'])
+    # df.loc[df['occupancy'] == class_i] = 1.0
+    # df.loc[df['occupancy'] != 1.0] = 0.0
 
-    target['occupancy'] = 1
-    remaining['occupancy'] = 0
-    df = pd.concat([target, remaining], axis=0)
+    # X_train_New = df.values[:, :-1]
+    # y_train_New = df.values[:, -1:]
 
-    
-    
+    combinedArray = np.concatenate([X_train, y_train], axis=1)
+    m = len(combinedArray)
+    n = len(combinedArray[0])
+    combinedArray[:, -1:][combinedArray[:, -1:] != class_i] = 0
+    combinedArray[:, -1:][combinedArray[:, -1:] == class_i] = 1
+    X_train_New = combinedArray[:, :-1]
+    y_train_New = combinedArray[:, -1:]
+    y_train_New = y_train_New.flatten()
 
+    return logistic_regression_batch_gradient_descent(X_train_New, y_train_New, max_num_epochs, threshold, alpha)
 
 if __name__ == "__main__":
     dirname = os.getcwd()
