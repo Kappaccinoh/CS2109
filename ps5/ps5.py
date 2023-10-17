@@ -448,14 +448,74 @@ def multi_class_logistic_regression_batch_gradient_descent(X_train: np.ndarray, 
 
     return logistic_regression_batch_gradient_descent(X_train_New, y_train_New, max_num_epochs, threshold, alpha)
 
+def multi_class_logistic_regression_classification(X: np.ndarray, weight_vector_none: np.ndarray, weight_vector_some: np.ndarray, weight_vector_full: np.ndarray):
+    '''
+    Do classification task using logistic regression.
+    In the case of a tie, break the tie in the priority 'none' > 'some' > 'full'.
+
+    Parameters
+    ----------
+    X: np.ndarray
+        (m, n) training dataset (features)
+    weight_vector_none: np.ndarray
+        (n,) weight parameters for the 'none' class.
+    weight_vector_some: np.ndarray
+        (n,) weight parameters for the 'some' class.
+    weight_vector_full: np.ndarray
+        (n,) weight parameters for the 'full' class.
+
+    Returns
+    -------
+    Classification result as an (m,) np.ndarray. Eg ['some', 'none', 'full', ... ,'none'].
+    '''
+    m = X.shape[0]
+    n = X.shape[1]
+
+    yPredVector_none = np.matmul(X, weight_vector_none)
+    diffVector_none = 1 / (1 + np.exp(-1 * yPredVector_none))
+
+    yPredVector_some = np.matmul(X, weight_vector_some)
+    diffVector_some = 1 / (1 + np.exp(-1 * yPredVector_some))
+
+    yPredVector_full = np.matmul(X, weight_vector_full)
+    diffVector_full = 1 / (1 + np.exp(-1 * yPredVector_full))
+
+    diffVector_none = diffVector_none.reshape(m,1)
+    diffVector_some = diffVector_some.reshape(m,1)
+    diffVector_full = diffVector_full.reshape(m,1)
+
+    combinedVector = np.hstack((diffVector_none, diffVector_some))
+    combinedVector = np.hstack((combinedVector, diffVector_full))
+    
+    strings = np.array(['none', 'some', 'full'])
+
+    max_indices = np.argmax(combinedVector, axis=1)
+
+    result = strings[max_indices]
+
+    max_values = np.max(combinedVector, axis=1)
+    tie_indices = np.all(combinedVector == max_values[:, None], axis=1)
+    ties = combinedVector[tie_indices]
+
+    if np.any(tie_indices):
+        tie_strings = np.take(strings, np.argsort(ties), axis=1)[:, 0]
+        result[tie_indices] = tie_strings
+
+    return result
+
 if __name__ == "__main__":
-    dirname = os.getcwd()
-    restaurant_data_filepath = os.path.join(dirname, 'restaurant_data.csv')
+    data1 = [[26, 9, 69, 'full'],
+        [54, 3, 16, 'some'],
+        [59, 7, 50, 'some' ],
+        [33, 0, 45, 'full']]
+    df1 = pd.DataFrame(data1, columns = ['max_capcity', 'feedback_score', 'average_expense', 'occupancy'])
+    X1 = df1.iloc[:, :-1].to_numpy()
 
-    restaurant_df = pd.read_csv(restaurant_data_filepath)
-    X = restaurant_df.values[:, :-1]
-    y = restaurant_df.values[:, -1:]
+    w11 = np.transpose([0.0013351567670329624, 2.5757816929896605e-05, -0.001189020140476165])
+    w12 = np.transpose([2.5757816929896605e-05, -0.001189020140476165, 0.0013351567670329624])
+    w13 = np.transpose([2.5757816929896605e-05, 0.0013351567670329624, -0.001189020140476165])
+    expected1 = np.transpose(['some', 'none', 'some', 'some'])
 
-    # multi_class_logistic_regression_batch_gradient_descent(X, y, 250, 0.4, 0.5, 'some')
-    ans = multi_class_logistic_regression_batch_gradient_descent(X,y, 250,0.5,1e-5,'some')
-    print(ans)
+    result1 = multi_class_logistic_regression_classification(X1, w11, w12, w13)
+
+    assert result1.shape == expected1.shape and (result1 == expected1).all()
