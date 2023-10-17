@@ -390,8 +390,51 @@ from time import time
 
 # plt.show()
 
-# Task 3.7
+# Task 4.1
+def multi_class_logistic_regression_batch_gradient_descent(X_train: np.ndarray, y_train: np.ndarray, max_num_epochs: int, threshold: np.float64, alpha: np.float64, class_i: str) -> np.ndarray:
+    '''
+    Initialize your weight to zeros. Write your terminating condition, and run the weight update for some iterations.
+    Get the resulting weight vector. Output the resulting weight vector.
+
+    Parameters
+    ----------
+    X_train: np.ndarray
+        (m, n) training dataset (features).
+    y_train: np.ndarray
+        (m,) training dataset (corresponding targets).
+    alpha: np.float64
+        logistic regression learning rate.
+    max_num_epochs: int
+        this should be one of the terminating conditions. 
+        That means if you initialize num_update_rounds to 0, 
+        then you should stop updating the weights when num_update_rounds >= max_num_epochs.
+    threshold: float
+        terminating when error <= threshold value, or if you reach the max number of update rounds first.
+    class_i: string
+        one of 'none', 'full', 'some'.
+
+    Returns
+    -------
+    The final (n,) weight parameters
+    '''
+    df = pd.DataFrame(np.concatenate((X_train, y_train), axis=1), columns=['max_capcity', 'feedback_score', 'average_expense', 'occupancy'])
+    target = df[df['occupancy'] == class_i]
+    remaining = df[df['occupancy'] != class_i]
+
+    target['occupancy'] = 1
+    remaining['occupancy'] = 0
+    df = pd.concat([target, remaining], axis=0)
+
+    
+    
 
 
 if __name__ == "__main__":
-    print("hi")
+    dirname = os.getcwd()
+    restaurant_data_filepath = os.path.join(dirname, 'restaurant_data.csv')
+
+    restaurant_df = pd.read_csv(restaurant_data_filepath)
+    X = restaurant_df.values[:, :-1]
+    y = restaurant_df.values[:, -1:]
+
+    multi_class_logistic_regression_batch_gradient_descent(X, y, 250, 0.4, 0.5, 'some')
