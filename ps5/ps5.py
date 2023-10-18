@@ -527,6 +527,58 @@ def linear_svm(X: np.ndarray, y: np.ndarray):
     accuracy = accuracy_score(y_test, predictions) * 100
     return predictions, accuracy
 
+# Task 5.2
+def gaussian_kernel_svm(X: np.ndarray, y: np.ndarray):
+    '''
+    Do classification using Gaussian Kernel svm. Given X and y, note that here X and y are not training sets, but
+    rather the entire dataset. Do a train test data split with test_size=0.3, and random_state=42.
+
+    Parameters
+    ----------
+    X: np.ndarray
+        (m, n) whole dataset (features)
+    y: np.ndarray
+        (m,) whole dataset (corresponding targets)
+
+    Returns
+    -------
+    pred: np.ndarray
+        The predictions.
+    acc: np.float64
+        The accuracy on a scale up to 100.
+    '''
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.3, random_state=42)
+
+    svm_classifier = svm.SVC(kernel='rbf')
+    svm_classifier.fit(X_train, y_train)
+    predictions = svm_classifier.predict(X_test)
+    accuracy = accuracy_score(y_test, predictions) * 100
+    return predictions, accuracy
 
 if __name__ == "__main__":
-    print("Q")
+    # small data
+    data1 = [[111.1, 10, -1], [111.2, 20, -1], [111.3, 10, -1], [111.4, 10, -1], [111.5, 10, -1], [211.6, 80, 1],
+            [111.4, 10, -1], [111.5, 80, 1], [211.6, 80, 1]]
+    df1 = pd.DataFrame(data1, columns = ['V1', 'V2', 'Class'])
+    X1 = df1.iloc[:, :-1].to_numpy()
+    y1 = df1.iloc[:, -1].to_numpy()
+    expected1_y = np.transpose([-1, -1, 1])
+    expected1_accuracy = 66.66666666666666
+    result1 = gaussian_kernel_svm(X1, y1)
+    assert (result1[0] == expected1_y).all() and (result1[0]).shape == expected1_y.shape and round(result1[1], 5) == round(expected1_accuracy, 5)
+
+
+    # subset of credit card data
+    class_0 = credit_df[credit_df['Class'] == 0]
+    class_1 = credit_df[credit_df['Class'] == 1]
+
+    data_0 = class_0.sample(n=15, random_state=42)
+    data_1 = class_1.sample(n=50, random_state=42)
+    data_100 = pd.concat([data_1, data_0], axis=0)
+    X = data_100.iloc[:, :-1].to_numpy()
+    y = data_100.iloc[:, -1].to_numpy()
+
+    expected_pred = np.transpose([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+    expected_accuracy = 80.0
+    result = gaussian_kernel_svm(X, y.ravel())
+    assert (result[0] == expected_pred).all() and (result[0]).shape == expected_pred.shape and round(result[1], 5) == round(expected_accuracy, 5)
