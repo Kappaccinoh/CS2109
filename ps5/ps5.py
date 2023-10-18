@@ -448,6 +448,7 @@ def multi_class_logistic_regression_batch_gradient_descent(X_train: np.ndarray, 
 
     return logistic_regression_batch_gradient_descent(X_train_New, y_train_New, max_num_epochs, threshold, alpha)
 
+# Task 4.2 Multi-class classification
 def multi_class_logistic_regression_classification(X: np.ndarray, weight_vector_none: np.ndarray, weight_vector_some: np.ndarray, weight_vector_full: np.ndarray):
     '''
     Do classification task using logistic regression.
@@ -494,19 +495,38 @@ def multi_class_logistic_regression_classification(X: np.ndarray, weight_vector_
 
     return max_indices
 
+from sklearn import svm
+from sklearn import model_selection
+from sklearn.metrics import accuracy_score
+
+# Task 5.1 
+def linear_svm(X: np.ndarray, y: np.ndarray):
+    '''
+    Do classification using linear svm. Given X and y, note that here X and y are not training sets, but rather the
+    entire dataset. Do a train test data split with test_size=0.3, and random_state=42.
+
+    Parameters
+    ----------
+    X: np.ndarray
+        (m, n) whole dataset (features)
+    y: np.ndarray
+        (m,) whole dataset (corresponding targets)
+
+    Returns
+    -------
+    pred: np.ndarray
+        The predictions.
+    acc: np.float64
+        The accuracy on a scale up to 100.
+    '''
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.3, random_state=42)
+
+    svm_classifier = svm.SVC(kernel='linear')
+    svm_classifier.fit(X_train, y_train)
+    predictions = svm_classifier.predict(X_test)
+    accuracy = accuracy_score(y_test, predictions) * 100
+    return predictions, accuracy
+
+
 if __name__ == "__main__":
-    data1 = [[26, 9, 69, 'full'],
-        [54, 3, 16, 'some'],
-        [59, 7, 50, 'some' ],
-        [33, 0, 45, 'full']]
-    df1 = pd.DataFrame(data1, columns = ['max_capcity', 'feedback_score', 'average_expense', 'occupancy'])
-    X1 = df1.iloc[:, :-1].to_numpy()
-
-    w11 = np.transpose([0.0013351567670329624, 2.5757816929896605e-05, -0.001189020140476165])
-    w12 = np.transpose([2.5757816929896605e-05, -0.001189020140476165, 0.0013351567670329624])
-    w13 = np.transpose([2.5757816929896605e-05, 0.0013351567670329624, -0.001189020140476165])
-    expected1 = np.transpose(['some', 'none', 'some', 'some'])
-
-    result1 = multi_class_logistic_regression_classification(X1, w11, w12, w13)
-
-    assert result1.shape == expected1.shape and (result1 == expected1).all()
+    print("Q")
