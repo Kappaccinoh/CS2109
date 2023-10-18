@@ -486,22 +486,13 @@ def multi_class_logistic_regression_classification(X: np.ndarray, weight_vector_
 
     combinedVector = np.hstack((diffVector_none, diffVector_some))
     combinedVector = np.hstack((combinedVector, diffVector_full))
-    
-    strings = np.array(['none', 'some', 'full'])
 
-    max_indices = np.argmax(combinedVector, axis=1)
+    max_indices = np.argmax(combinedVector, axis=1).astype('object')
+    max_indices[max_indices == 0] = "none"
+    max_indices[max_indices == 1] = "some"
+    max_indices[max_indices == 2] = "full"
 
-    result = strings[max_indices]
-
-    max_values = np.max(combinedVector, axis=1)
-    tie_indices = np.all(combinedVector == max_values[:, None], axis=1)
-    ties = combinedVector[tie_indices]
-
-    if np.any(tie_indices):
-        tie_strings = np.take(strings, np.argsort(ties), axis=1)[:, 0]
-        result[tie_indices] = tie_strings
-
-    return result
+    return max_indices
 
 if __name__ == "__main__":
     data1 = [[26, 9, 69, 'full'],
