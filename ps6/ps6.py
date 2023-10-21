@@ -46,8 +46,10 @@ x = torch.linspace(-math.pi, math.pi, 1000)
 y = torch.sin(x)
 plt.plot(x, y, linestyle='solid', label='sin(x)')
 
-# MSE - Graph 1
+# MSE Function
 mse = lambda y_true, y_pred: torch.mean(torch.square(y_pred - y_true))
+
+# MSE - Graph 1
 a, b, c, d = polyfit(x, y, mse, 3, 1e-6, 5000)
 y_pred_mse1 = a + b * x + c * x ** 2 + d * x ** 3
 plt.plot(x, y_pred_mse1.detach().numpy(), linestyle='dashed', label=f'mse-1')
@@ -63,7 +65,7 @@ y_pred_mse3 = a + b * x
 plt.plot(x, y_pred_mse3.detach().numpy(), linestyle='dashed', label=f'mse-3')
 
 # MSE - Graph 4
-a, b, c, d, e, f, g = polyfit(x, y, mse, 6, 1e-3, 5000)
+a, b, c, d, e, f, g = polyfit(x, y, mse, 6, 1e-8, 5000)
 y_pred_mse4 = a + b * x + c * x ** 2 + d * x ** 3 + e * x ** 4 + f * x ** 5 + g * x ** 6
 plt.plot(x, y_pred_mse4.detach().numpy(), linestyle='dashed', label=f'mse-4')
 
