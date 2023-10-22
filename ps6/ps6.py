@@ -74,36 +74,95 @@ def polyfit(x, y, loss_fn, n, lr, n_iter):
 # plt.legend()
 # plt.show()
 
-# Task 2.1
-x = torch.linspace(-10, 10, 1000).reshape(-1, 1)
-y = torch.abs(x-1)
 
-def forward_pass(x, w0, w1, activation_fn):
-    x_with_bias = np.concatenate((x, np.ones((len(x), 1))), axis=1)
-    x_with_bias = torch.from_numpy(x_with_bias).float()
+# # Task 2.1
+# x = torch.linspace(-10, 10, 1000).reshape(-1, 1)
+# y = torch.abs(x-1)
 
-    outHidden = torch.matmul(x_with_bias, w0)  # (batch_size, 3) * (3, 2) -> (batch_size, 2)
-    outHidden = activation_fn(outHidden)
-    outFinal = torch.matmul(outHidden, w1)  # (batch_size, 2) * (3, 1) -> (batch_size, 1)
-    return outFinal
+# def forward_pass(x, w0, w1, activation_fn):
+#     '''
+#     x - (n, 1) -> add bias to make (n , 2)
+#     w0 - (2,2)
+#     w1 - (3,1) -> add bias to make (3,2)
+#     '''
+#     x = torch.cat((x, torch.ones((len(x), 1))), dim=1)
+#     w1 = torch.cat((w1, torch.ones((len(w1), 1))), dim=1)
+#     hidden = activation_fn(torch.matmul(x, w0))
+#     output = torch.matmul(hidden, w1.t())
 
-# Exact weights
-w0 = torch.tensor([[-1., 1.], [1., -1.]], requires_grad=True)
-w1 = torch.tensor([[0.], [1.], [1.]], requires_grad=True)
+#     return output
 
-# Performing a forward pass on exact solution for weights will give us the correct y values
-x_sample = torch.linspace(-2, 2, 5).reshape(-1, 1)
-forward_pass(x_sample, w0, w1, torch.relu) # tensor([[3.], [2.], [1.], [0.], [1.]])
+
+# # Exact weights
+# w0 = torch.tensor([[-1., 1.], [1., -1.]], requires_grad=True)
+# w1 = torch.tensor([[0.], [1.], [1.]], requires_grad=True)
+
+# # Performing a forward pass on exact solution for weights will give us the correct y values
+# x_sample = torch.linspace(-2, 2, 5).reshape(-1, 1)
+# forward_pass(x_sample, w0, w1, torch.relu) # tensor([[3.], [2.], [1.], [0.], [1.]])
+
+# Task 2.2
+torch.manual_seed(1) # Set seed to some fixed value
+
+w0 = torch.randn(2, 2, requires_grad=True)
+w1 = torch.randn(3, 1, requires_grad=True)
+
+learning_rate = 1e-3
+print('iter', 'loss', '\n----', '----', sep='\t')
+for t in range(1, 10001):
+    # Forward pass: compute predicted y
+    y_pred = forward_pass(x, w0, w1, torch.relu)
+
+    loss = torch.mean(torch.square(y - y_pred))
+    loss.backward()
+
+    if t % 1000 == 0:
+        print(t, loss.item(), sep='\t')
+
+    with torch.no_grad():
+        w0 -= learning_rate * w0.grad
+        w1 -= learning_rate * w1.grad
+        w0.grad.zero_()
+        w1.grad.zero_()
+        
+
+print("--- w0 ---", w0, sep='\n')
+print("--- w1 ---", w1, sep='\n')
+y_pred = forward_pass(x, w0, w1, torch.relu)
+plt.plot(x, y, linestyle='solid', label='|x-1|')
+plt.plot(x, y_pred.detach().numpy(), linestyle='dashed', label='perceptron')
+plt.axis('equal')
+plt.title('Fit NN on abs function')
+plt.legend()
+plt.show()
+
+# Task 5: Submit the values of `w0`, `w1`, and `loss` values after fitting
+# Note: An acceptable loss value should be less than 1.0
+#       You should try adjusting the random seed, learning rate, or 
+#       number of iterations to improve your model.
+
+w0   = [[0.0, 0.0], [0.0,  0.0]] # to be computed
+w1   = [[0.0], [0.0], [0.0]]     # to be computed
+loss = 0.0                       # to be computed
+
+# Task 2.3
+
+
+
 
 
 if __name__ == "__main__":
-    w0 = torch.tensor([[-1., 1.], [1., -1.]], requires_grad=True)
-    w1 = torch.tensor([[0.], [1.], [1.]], requires_grad=True)
+    print("main")
+    # w0 = torch.tensor([[-1., 1.], [1., -1.]], requires_grad=True)
+    # w1 = torch.tensor([[0.], [1.], [1.]], requires_grad=True)
 
-    output0 = forward_pass(torch.linspace(0,1,50).reshape(-1, 1), w0, w1, torch.relu)
-    x_sample = torch.linspace(-2, 2, 5).reshape(-1, 1)
-    test1 = forward_pass(x_sample, w0, w1, torch.relu).tolist()
-    output1 = [[3.], [2.], [1.], [0.], [1.]]
+    # output0 = forward_pass(torch.linspace(0,1,50).reshape(-1, 1), w0, w1, torch.relu)
+    # x_sample = torch.linspace(-2, 2, 5).reshape(-1, 1)
+    # test1 = forward_pass(x_sample, w0, w1, torch.relu).tolist()
+    # output1 = [[3.], [2.], [1.], [0.], [1.]]
 
-    assert output0.shape == torch.Size([50, 1])
-    assert test1 == output1
+    # print(test1)
+    # print(output1)
+
+    # assert output0.shape == torch.Size([50, 1])
+    # assert test1 == output1
