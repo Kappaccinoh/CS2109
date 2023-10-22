@@ -386,8 +386,38 @@ class DigitNet(nn.Module):
         x = torch.softmax(self.l3(x), dim=1)
         return x
 
+# Task 3.4
+def train_model(x_train, y_train, epochs=20):
+    """
+    Trains the model for 20 epochs/iterations
+    
+    Parameters
+    ----------
+        x_train : A tensor of training features of shape (60000, 784)
+        y_train : A tensor of training labels of shape (60000, 1)
+        epochs  : Number of epochs, default of 20
+        
+    Returns
+    -------
+        The final model 
+    """
+    model = DigitNet(784, 10)
+    optimiser = torch.optim.Adam(model.parameters()) # use Adam
+    loss_fn = nn.CrossEntropyLoss()   # use CrossEntropyLoss
+
+    for i in range(epochs):
+        optimiser.zero_grad()
+        output = model(x_train)
+        loss = loss_fn(output, y_train.squeeze())
+        loss.backward()
+        optimiser.step()
+
+    return model
+                
+digit_model = train_model(x_train, y_train)
 
 if __name__ == "__main__":
-    model = DigitNet(784, 10)
-    assert [layer.detach().numpy().shape for name, layer in model.named_parameters()] \
-            == [(512, 784), (512,), (128, 512), (128,), (10, 128), (10,)]
+    x_train_new = torch.rand(5, 784, requires_grad=True)
+    y_train_new = ones = torch.ones(5, dtype=torch.uint8)
+
+    assert type(train_model(x_train_new, y_train_new)) == DigitNet
