@@ -416,8 +416,35 @@ def train_model(x_train, y_train, epochs=20):
                 
 digit_model = train_model(x_train, y_train)
 
-if __name__ == "__main__":
-    x_train_new = torch.rand(5, 784, requires_grad=True)
-    y_train_new = ones = torch.ones(5, dtype=torch.uint8)
+# Task 3.5
+def get_accuracy(scores, labels):
+    """
+    Helper function that returns accuracy of model
+    
+    Parameters
+    ----------
+        scores : The raw softmax scores of the network
+        labels : The ground truth labels
+        
+    Returns
+    -------
+        Accuracy of the model. Return a number in range [0, 1].
+        0 means 0% accuracy while 1 means 100% accuracy
+    """
+    _, predictions = torch.max(scores, 1)
+    correct = (predictions == labels.squeeze()).sum().item()
+    total = labels.size(0)
+    accuracy = correct / total
+    return accuracy
 
-    assert type(train_model(x_train_new, y_train_new)) == DigitNet
+scores = digit_model(x_test) # n x 10 tensor
+get_accuracy(scores, y_test)
+
+if __name__ == "__main__":
+    torch.manual_seed(0)
+    for n in torch.randint(50, 100, (5,)):
+        y_true = torch.randint(0, 9, (n,))
+        scores = torch.rand(n, 10)
+        _, y_pred = torch.max(scores, 1)
+        acc_true = (y_pred == y_true).float().mean().item()
+        assert get_accuracy(scores, y_true) == acc_true
