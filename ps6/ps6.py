@@ -111,15 +111,62 @@ def forward_pass(x, w0, w1, activation_fn):
 # x_sample = torch.linspace(-2, 2, 5).reshape(-1, 1)
 # forward_pass(x_sample, w0, w1, torch.relu) # tensor([[3.], [2.], [1.], [0.], [1.]])
 
-# Task 2.2
+# # Task 2.2
+# torch.manual_seed(1) # Set seed to some fixed value
+
+# w0 = torch.randn(2, 2, requires_grad=True)
+# w1 = torch.randn(3, 1, requires_grad=True)
+
+# learning_rate = 1e-3
+# print('iter', 'loss', '\n----', '----', sep='\t')
+# for t in range(1, 100000):
+#     # Forward pass: compute predicted y
+#     y_pred = forward_pass(x, w0, w1, torch.relu)
+
+#     loss = torch.mean(torch.square(y - y_pred))
+#     loss.backward()
+
+#     if t % 1000 == 0:
+#         print(t, loss.item(), sep='\t')
+
+#     with torch.no_grad():
+#         w0 -= learning_rate * w0.grad
+#         w1 -= learning_rate * w1.grad
+#         w0.grad.zero_()
+#         w1.grad.zero_()
+        
+
+# print("--- w0 ---", w0, sep='\n')
+# print("--- w1 ---", w1, sep='\n')
+# y_pred = forward_pass(x, w0, w1, torch.relu)
+# plt.plot(x, y, linestyle='solid', label='|x-1|')
+# plt.plot(x, y_pred.detach().numpy(), linestyle='dashed', label='perceptron')
+# plt.axis('equal')
+# plt.title('Fit NN on abs function')
+# plt.legend()
+# plt.show()
+
+# # Task 5: Submit the values of `w0`, `w1`, and `loss` values after fitting
+# # Note: An acceptable loss value should be less than 1.0
+# #       You should try adjusting the random seed, learning rate, or 
+# #       number of iterations to improve your model.
+
+# w0   = [[1.2394, -1.2318], [0.3287,  2.6828]] # to be computed
+# w1   = [[9.1564], [1.6083], [-3.0357]]     # to be computed
+# loss = 0.106                       # to be computed
+
+# Task 2.3
+'''
 torch.manual_seed(1) # Set seed to some fixed value
+
+# Pass 1
 
 w0 = torch.randn(2, 2, requires_grad=True)
 w1 = torch.randn(3, 1, requires_grad=True)
 
 learning_rate = 1e-3
 print('iter', 'loss', '\n----', '----', sep='\t')
-for t in range(1, 10001):
+for t in range(1, 10000):
     # Forward pass: compute predicted y
     y_pred = forward_pass(x, w0, w1, torch.relu)
 
@@ -140,7 +187,69 @@ print("--- w0 ---", w0, sep='\n')
 print("--- w1 ---", w1, sep='\n')
 y_pred = forward_pass(x, w0, w1, torch.relu)
 plt.plot(x, y, linestyle='solid', label='|x-1|')
-plt.plot(x, y_pred.detach().numpy(), linestyle='dashed', label='perceptron')
+plt.plot(x, y_pred.detach().numpy(), linestyle='dashed', label='perceptron-1')
+
+# Pass 2
+
+w0 = torch.randn(2, 2, requires_grad=True)
+w1 = torch.randn(3, 1, requires_grad=True)
+
+learning_rate = 1e-3
+print('iter', 'loss', '\n----', '----', sep='\t')
+for t in range(1, 10000):
+    # Forward pass: compute predicted y
+    y_pred = forward_pass(x, w0, w1, torch.relu)
+
+    loss = torch.mean(torch.square(y - y_pred))
+    loss.backward()
+
+    if t % 1000 == 0:
+        print(t, loss.item(), sep='\t')
+
+    with torch.no_grad():
+        w0 -= learning_rate * w0.grad
+        w1 -= learning_rate * w1.grad
+        w0.grad.zero_()
+        w1.grad.zero_()
+        
+
+print("--- w0 ---", w0, sep='\n')
+print("--- w1 ---", w1, sep='\n')
+y_pred = forward_pass(x, w0, w1, torch.relu)
+plt.plot(x, y, linestyle='solid', label='|x-1|')
+plt.plot(x, y_pred.detach().numpy(), linestyle='dashed', label='perceptron-2')
+
+# Pass 3
+
+w0 = torch.randn(2, 2, requires_grad=True)
+w1 = torch.randn(3, 1, requires_grad=True)
+
+learning_rate = 1e-3
+print('iter', 'loss', '\n----', '----', sep='\t')
+for t in range(1, 10000):
+    # Forward pass: compute predicted y
+    y_pred = forward_pass(x, w0, w1, torch.relu)
+
+    loss = torch.mean(torch.square(y - y_pred))
+    loss.backward()
+
+    if t % 1000 == 0:
+        print(t, loss.item(), sep='\t')
+
+    with torch.no_grad():
+        w0 -= learning_rate * w0.grad
+        w1 -= learning_rate * w1.grad
+        w0.grad.zero_()
+        w1.grad.zero_()
+        
+
+print("--- w0 ---", w0, sep='\n')
+print("--- w1 ---", w1, sep='\n')
+y_pred = forward_pass(x, w0, w1, torch.relu)
+plt.plot(x, y, linestyle='solid', label='|x-1|')
+plt.plot(x, y_pred.detach().numpy(), linestyle='dashed', label='perceptron-3')
+
+# Plotting Final
 plt.axis('equal')
 plt.title('Fit NN on abs function')
 plt.legend()
@@ -154,22 +263,9 @@ plt.show()
 w0   = [[1.2394, -1.2318], [0.3287,  2.6828]] # to be computed
 w1   = [[9.1564], [1.6083], [-3.0357]]     # to be computed
 loss = 0.106                       # to be computed
-
-# # Task 2.3
-
+'''
 
 # Task 3
 
 
 if __name__ == "__main__":
-    # print("main")
-    w0 = torch.tensor([[-1., 1.], [1., -1.]], requires_grad=True)
-    w1 = torch.tensor([[0.], [1.], [1.]], requires_grad=True)
-
-    output0 = forward_pass(torch.linspace(0,1,50).reshape(-1, 1), w0, w1, torch.relu)
-    x_sample = torch.linspace(-2, 2, 5).reshape(-1, 1)
-    test1 = forward_pass(x_sample, w0, w1, torch.relu).tolist()
-    output1 = [[3.], [2.], [1.], [0.], [1.]]
-
-    assert output0.shape == torch.Size([50, 1])
-    assert test1 == output1
