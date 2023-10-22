@@ -103,57 +103,57 @@ def forward_pass(x, w0, w1, activation_fn):
     return finalOut
 
 
-# Exact weights
-w0 = torch.tensor([[-1., 1.], [1., -1.]], requires_grad=True)
-w1 = torch.tensor([[0.], [1.], [1.]], requires_grad=True)
+# # Exact weights
+# w0 = torch.tensor([[-1., 1.], [1., -1.]], requires_grad=True)
+# w1 = torch.tensor([[0.], [1.], [1.]], requires_grad=True)
 
-# Performing a forward pass on exact solution for weights will give us the correct y values
-x_sample = torch.linspace(-2, 2, 5).reshape(-1, 1)
-forward_pass(x_sample, w0, w1, torch.relu) # tensor([[3.], [2.], [1.], [0.], [1.]])
+# # Performing a forward pass on exact solution for weights will give us the correct y values
+# x_sample = torch.linspace(-2, 2, 5).reshape(-1, 1)
+# forward_pass(x_sample, w0, w1, torch.relu) # tensor([[3.], [2.], [1.], [0.], [1.]])
 
-# # Task 2.2
-# torch.manual_seed(1) # Set seed to some fixed value
+# Task 2.2
+torch.manual_seed(1) # Set seed to some fixed value
 
-# w0 = torch.randn(2, 2, requires_grad=True)
-# w1 = torch.randn(3, 1, requires_grad=True)
+w0 = torch.randn(2, 2, requires_grad=True)
+w1 = torch.randn(3, 1, requires_grad=True)
 
-# learning_rate = 1e-3
-# print('iter', 'loss', '\n----', '----', sep='\t')
-# for t in range(1, 10001):
-#     # Forward pass: compute predicted y
-#     y_pred = forward_pass(x, w0, w1, torch.relu)
+learning_rate = 1e-3
+print('iter', 'loss', '\n----', '----', sep='\t')
+for t in range(1, 10001):
+    # Forward pass: compute predicted y
+    y_pred = forward_pass(x, w0, w1, torch.relu)
 
-#     loss = torch.mean(torch.square(y - y_pred))
-#     loss.backward()
+    loss = torch.mean(torch.square(y - y_pred))
+    loss.backward()
 
-#     if t % 1000 == 0:
-#         print(t, loss.item(), sep='\t')
+    if t % 1000 == 0:
+        print(t, loss.item(), sep='\t')
 
-#     with torch.no_grad():
-#         w0 -= learning_rate * w0.grad
-#         w1 -= learning_rate * w1.grad
-#         w0.grad.zero_()
-#         w1.grad.zero_()
+    with torch.no_grad():
+        w0 -= learning_rate * w0.grad
+        w1 -= learning_rate * w1.grad
+        w0.grad.zero_()
+        w1.grad.zero_()
         
 
-# print("--- w0 ---", w0, sep='\n')
-# print("--- w1 ---", w1, sep='\n')
-# y_pred = forward_pass(x, w0, w1, torch.relu)
-# plt.plot(x, y, linestyle='solid', label='|x-1|')
-# plt.plot(x, y_pred.detach().numpy(), linestyle='dashed', label='perceptron')
-# plt.axis('equal')
-# plt.title('Fit NN on abs function')
-# plt.legend()
-# plt.show()
+print("--- w0 ---", w0, sep='\n')
+print("--- w1 ---", w1, sep='\n')
+y_pred = forward_pass(x, w0, w1, torch.relu)
+plt.plot(x, y, linestyle='solid', label='|x-1|')
+plt.plot(x, y_pred.detach().numpy(), linestyle='dashed', label='perceptron')
+plt.axis('equal')
+plt.title('Fit NN on abs function')
+plt.legend()
+plt.show()
 
-# # Task 5: Submit the values of `w0`, `w1`, and `loss` values after fitting
-# # Note: An acceptable loss value should be less than 1.0
-# #       You should try adjusting the random seed, learning rate, or 
-# #       number of iterations to improve your model.
+# Task 5: Submit the values of `w0`, `w1`, and `loss` values after fitting
+# Note: An acceptable loss value should be less than 1.0
+#       You should try adjusting the random seed, learning rate, or 
+#       number of iterations to improve your model.
 
-# w0   = [[0.0, 0.0], [0.0,  0.0]] # to be computed
-# w1   = [[0.0], [0.0], [0.0]]     # to be computed
-# loss = 0.0                       # to be computed
+w0   = [[1.2394, -1.2318], [0.3287,  2.6828]] # to be computed
+w1   = [[9.1564], [1.6083], [-3.0357]]     # to be computed
+loss = 0.106                       # to be computed
 
 # # Task 2.3
 
