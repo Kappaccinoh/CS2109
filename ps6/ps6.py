@@ -265,7 +265,129 @@ w1   = [[9.1564], [1.6083], [-3.0357]]     # to be computed
 loss = 0.106                       # to be computed
 '''
 
-# Task 3
+# Task 3.1
+class MyFirstNeuralNet(nn.Module):
+    def __init__(self): # set the arguments you'd need
+        super().__init__()
+        self.l1 = nn.Linear(1, 2) # bias included by default
+        self.l2 = nn.Linear(2, 1) # bias included by default
+        self.relu = nn.ReLU()
+ 
+    # Task 3.1: Forward pass
+    def forward(self, x):
+        '''
+        Forward pass to process input through two linear layers and ReLU activation function.
+
+        Parameters
+        ----------
+        x : A tensor of of shape (n, 1) where n is the number of training instances
+
+        Returns
+        -------
+            Tensor of shape (n, 1)
+        '''
+        x = self.relu(self.l1(x))
+        x = self.l2(x)
+        return x
+
+# Task 3.2
+'''
+torch.manual_seed(6) # Set seed to some fixed value
+
+epochs = 10000
+
+model = MyFirstNeuralNet()
+# the optimizer controls the learning rate
+optimiser = torch.optim.SGD(model.parameters(), lr=1e-3, momentum=0)
+loss_fn = nn.MSELoss()
+
+x = torch.linspace(-10, 10, 1000).reshape(-1, 1)
+y = torch.abs(x-1)
+
+print('Epoch', 'Loss', '\n-----', '----', sep='\t')
+for i in range(1, epochs+1):
+    # reset gradients to 0
+    optimiser.zero_grad()
+    # get predictions
+    y_pred = model(x)
+    # compute loss
+    loss = loss_fn(y_pred, y)
+    # backpropagate
+    loss.backward()
+    # update the model weights
+    optimiser.step()
+
+    if i % 1000 == 0:
+        print (f"{i:5d}", loss.item(), sep='\t')
+
+y_pred = model(x)
+plt.plot(x, y, linestyle='solid', label='|x-1|')
+plt.plot(x, y_pred.detach().numpy(), linestyle='dashed', label='perceptron')
+plt.axis('equal')
+plt.title('Fit NN on y=|x-1| function')
+plt.legend()
+plt.show()
+
+# To submit this output
+print("--- Submit the OrderedDict below ---")
+print(model.state_dict())
+'''
+
+# Task 3.3
+# DO NOT REMOVE THIS CELL – THIS DOWNLOADS THE MNIST DATASET
+# RUN THIS CELL BEFORE YOU RUN THE REST OF THE CELLS BELOW
+from torchvision import datasets
+
+# This downloads the MNIST datasets ~63MB
+mnist_train = datasets.MNIST("./", train=True, download=True)
+mnist_test  = datasets.MNIST("./", train=False, download=True)
+
+x_train = mnist_train.data.reshape(-1, 784) / 255
+y_train = mnist_train.targets
+    
+x_test = mnist_test.data.reshape(-1, 784) / 255
+y_test = mnist_test.targets
+
+class DigitNet(nn.Module):
+    def __init__(self, input_dimensions, num_classes): # set the arguments you'd need
+        super().__init__()
+        """
+        YOUR CODE HERE
+        - DO NOT hardcode the input_dimensions, use the parameter in the function
+        - Your network should work for any input and output size 
+        - Create the 3 layers (and a ReLU layer) using the torch.nn layers API
+        """
+        self.l1 = nn.Linear(input_dimensions,512)
+        self.l2 = nn.Linear(512,128)
+        self.l3 = nn.Linear(128,num_classes)
+        self.relu = nn.ReLU()
+        
+    def forward(self, x):
+        """
+        Performs the forward pass for the network.
+        
+        Parameters
+        ----------
+        x : Input tensor (batch size is the entire dataset)
+
+        Returns
+        -------
+            The output of the entire 3-layer model.
+        """
+        
+        """
+        YOUR CODE
+        
+        - Pass the inputs through the sequence of layers
+        - Run the final output through the Softmax function on the right dimension!
+        """
+        x = self.relu(self.l1(x))
+        x = self.relu(self.l2(x))
+        x = torch.softmax(self.l3(x), dim=1)
+        return x
 
 
 if __name__ == "__main__":
+    model = DigitNet(784, 10)
+    assert [layer.detach().numpy().shape for name, layer in model.named_parameters()] \
+            == [(512, 784), (512,), (128, 512), (128,), (10, 128), (10,)]
