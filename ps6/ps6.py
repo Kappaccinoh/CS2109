@@ -83,7 +83,9 @@ def forward_pass(x, w0, w1, activation_fn):
     '''
     x - (n, 1) -> add bias to make (n , 2)
     w0 - (2,2)
-    w1 - (3,1) -> add bias to make (3,2)
+    output of x and w0 - (n,2) -> add bias to make (n,3)
+    w1 - (3,1) 
+    output -> activation_fn
     '''
     x = torch.cat((x, torch.ones((len(x), 1))), dim=1)
     hiddenOutput0 = activation_fn(
@@ -99,6 +101,7 @@ def forward_pass(x, w0, w1, activation_fn):
     hiddenOutput = torch.cat((ones, hiddenOutput), axis=1) # (n,3)
 
     finalOut = torch.matmul(hiddenOutput, w1) # (n,1)
+    finalOut = activation_fn(finalOut)
 
     return finalOut
 
@@ -441,10 +444,13 @@ scores = digit_model(x_test) # n x 10 tensor
 get_accuracy(scores, y_test)
 
 if __name__ == "__main__":
-    torch.manual_seed(0)
-    for n in torch.randint(50, 100, (5,)):
-        y_true = torch.randint(0, 9, (n,))
-        scores = torch.rand(n, 10)
-        _, y_pred = torch.max(scores, 1)
-        acc_true = (y_pred == y_true).float().mean().item()
-        assert get_accuracy(scores, y_true) == acc_true
+    w0 = torch.tensor([[-1., 1.], [1., -1.]], requires_grad=True)
+    w1 = torch.tensor([[0.], [1.], [1.]], requires_grad=True)
+
+    output0 = forward_pass(torch.linspace(0,1,50).reshape(-1, 1), w0, w1, torch.relu)
+    x_sample = torch.linspace(-2, 2, 5).reshape(-1, 1)
+    test1 = forward_pass(x_sample, w0, w1, torch.relu).tolist()
+    output1 = [[3.], [2.], [1.], [0.], [1.]]
+
+    assert output0.shape == torch.Size([50, 1])
+    assert test1 == output1
