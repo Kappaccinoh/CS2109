@@ -87,13 +87,13 @@ def forward_pass(x, w0, w1, activation_fn):
     w1 - (3,1) 
     output -> activation_fn
     '''
-    x = torch.cat((x, torch.ones((len(x), 1))), dim=1) # (n,2)
+    x = torch.cat((torch.ones((len(x), 1)), x), dim=1) # (n,2)
 
     hiddenOutput = activation_fn(
         torch.matmul(w0, x.t())
     ) # (2, n))
 
-    ones = torch.ones((len(hiddenOutput[0]), 1)) # [n,1]
+    ones = torch.ones((len(x), 1)) # [n,1]
 
     hiddenOutput = torch.cat((ones, hiddenOutput.t()), dim=1) # [n,3]
 
