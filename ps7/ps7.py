@@ -354,11 +354,13 @@ plt.show()
 
 from sklearn.metrics import f1_score, precision_score, recall_score
 
+'''
 print(f1_score(pred_do.argmax(dim=1), mnist_test.targets, average='macro'))
 print(precision_score(pred_do.argmax(dim=1), mnist_test.targets, average='macro'))
 print(recall_score(pred_do.argmax(dim=1), mnist_test.targets, average='macro'))
+'''
 
-
+'''
 cifar_train = datasets.CIFAR10("./", train=True, download=True, transform=transforms.ToTensor())
 cifar_train_loader = torch.utils.data.DataLoader(cifar_train, batch_size=128, shuffle=True)
 
@@ -377,6 +379,7 @@ ax2.imshow(tensor_img.permute(1, 2, 0))
 ax2.axis("off")
 ax2.set_title("After Transformation")
 plt.show()
+'''
 
 # pick your data augmentations here
 def get_augmentations():
@@ -390,13 +393,13 @@ def get_augmentations():
     
     return T
 
-'''
-Rationale Behind Chosen Augmentaions
+# Rationale Behind Chosen Augmentaions
 
-RandomHorizontal/VerticalFlip - In this case I want to generalise the orientation of the object since it doesnt affect the label outcome. This will create more variations in the dataset and make it more generalisable.
-RandomRotation - Again makes the model become more robust since as the images are rotated by a random angle.
-ColourJitter - Makes the model more generalisable to changes in lighting conditions, which I vary using brightness/contrast/saturation/hue
-'''
+# RandomHorizontal/VerticalFlip - In this case I want to generalise the orientation of the object since it doesnt affect the label outcome. This will create more variations in the dataset and make it more generalisable.
+# RandomRotation - Again makes the model become more robust since as the images are rotated by a random angle.
+# ColourJitter - Makes the model more generalisable to changes in lighting conditions, which I vary using brightness/contrast/saturation/hue
+
+# I avoided randomcropping or resizing in this case since the images are already quite small (32px x 32px), so any additional cropping or resizing may lead to information loss.
 
 # do not remove this cell
 # run this before moving on
@@ -417,6 +420,162 @@ CIFAR-10 images have dimensions 3x32x32, while MNIST is 1x28x28
 """
 cifar_train_loader = torch.utils.data.DataLoader(cifar_train, batch_size=128, shuffle=True)
 cifar_test_loader = torch.utils.data.DataLoader(cifar_test, batch_size=10000)
+
+class CIFARCNN(nn.Module):
+    def __init__(self, classes):
+        super().__init__()
+        """
+        classes: integer that corresponds to the number of classes for CIFAR-10
+        """
+        self.conv = nn.Sequential(
+                        nn.Conv2d(3, 32, 3),
+                        nn.MaxPool2d(2),
+                        nn.LeakyReLU(0.1),
+                        nn.Conv2d(32, 64, 3),
+                        nn.MaxPool2d(2),
+                        nn.LeakyReLU(0.1)
+                    )
+
+        self.fc = nn.Sequential(
+                        nn.Linear(64, 256),
+                        nn.LeakyReLU(0.1),
+                        nn.Linear(256, 128),
+                        nn.LeakyReLU(0.1),
+                        nn.Linear(128, classes)
+                    )
+        
+    def forward(self, x):
+        # YOUR CODE HERE
+        x = self.conv(x)
+
+        x = x.view(x.shape[0], 64, 6*6).mean(2) # GAP – do not remove this line
+        
+        # YOUR CODE HERE
+        x = self.fc(x)
+        return x
+
+# %%time
+# do not remove – nothing to code here
+# run this cell before moving on
+
+# cifar10_model, losses = train_model(cifar_train_loader, CIFARCNN(10))
+# cifar10_model_scripted = torch.jit.script(cifar10_model)
+# cifar10_model_scripted.save("cifar10_model.pt")
+cifar10_model = torch.jit.load("cifar10_model.pt")
+
+# do not remove – nothing to code here
+# run this cell before moving on
+
+with torch.no_grad():
+    cifar10_model.eval()
+    for i, data in enumerate(cifar_test_loader):
+        x, y = data
+        pred = cifar10_model(x)
+        acc = get_accuracy(pred, y)
+        print(f"cifar accuracy: {acc}")
+        
+# don't worry if the CIFAR-10 accuracy is low, it's a tough dataset to crack.
+# as long as you get something shy of 50%, you should be alright!
+
+def get_CAM(feature_map, weight, class_idx):
+    """
+    PARAMS
+        feature_map: the output of the final pre-GAP layer in the ConvNet
+        weight: the parameters of the first linear layer post-GAP
+        class_idx: the final prediction label of the ConvNet
+    
+    RETURNS
+        a CAM heatmap of the areas the ConvNet is focusing on more
+    """
+    
+    # do not remove these lines
+    size_upsample = (32, 32)
+    bz, nc, h, w = feature_map.shape
+
+    before_dot = feature_map.reshape((nc, h*w))
+    cam = weight[class_idx].unsqueeze(0) @ before_dot
+    
+    """
+    YOUR CODE HERE - perform the steps listed above
+    """
+    
+    cam = torch.squeeze(cam) ## remove the first dimension of cam using torch.squeeze(...)
+    cam = cam.view(h, w) ## reshape cam to h x w
+    cam = cam - torch.min(cam) ## get the difference of cam and the minimum elements of cam
+    cam = cam / torch.max(cam) ## divide cam by the maximum elements of cam
+    cam = torch.clip(cam, 0, 1) ## clip the values of cam so they are within the [0, 1] range
+    
+    # here, `cam` is the final processed heatmap
+    # we upsample/resize the heatmap to the original image's dimensions
+    # do not remove these lines
+    img = transforms.Resize(size_upsample)(cam.unsqueeze(0))
+    
+    return img.detach().numpy(), cam
+
+# do not remove this cell
+# run this cell before moving on
+
+cifar10_classes = [
+    "airplane",
+    "automobile",
+    "bird",
+    "cat",
+    "deer",
+    "dog",
+    "frog",
+    "horse",
+    "ship",
+    "truck",
+]
+
+def plot_cam(img, cam):
+    ''' Visualization function '''
+    img = img.permute(1, 2, 0)
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(10,7))
+    ax1.imshow(img)
+    ax1.set_title(f"Input image\nLabel: {cifar10_classes[y]}")
+
+    ax2.imshow(cam.reshape(32, 32), cmap="jet")
+    ax2.set_title("Raw CAM.")
+
+    ax3.imshow(img)
+    ax3.imshow(cam.reshape(32, 32), cmap="jet", alpha=0.2)
+    ax3.set_title(f"Overlayed CAM.\nPrediction: {cifar10_classes[idx[0]]}")
+    plt.show()
+
+# do not remove this cell
+# run this cell before moving on
+
+rand_idx = torch.randint(0, 10000, size=[1]) # pick a random index from the test set
+
+x = cifar_test[rand_idx][0] # test image
+y = cifar_test[rand_idx][1] # associated test label
+
+cifar10_model.eval()
+scores = cifar10_model(x.unsqueeze(0)) # get the raw scores
+probs = scores.data.squeeze()
+probs, idx = probs.sort(0, True)
+
+print('true class: ', cifar10_classes[y])
+print('predicated class: ', cifar10_classes[idx[0]])
+
+assert y == idx[0], "We want to visualize what the model is focusing on for a correct prediction, run again for another random sample!"
+
+# if the printed prediction and label are different, it means the model misclassified it. 
+# Rerun this cell until you get the same class printed for both. It will help for the visualisation later.
+
+# Get the first Linear layer's weights and final Feature Map
+params = list(cifar10_model.fc.parameters()) # access the model layers
+weight = params[0].data # grab the first layer's weights
+
+feature_maps = cifar10_model.conv(x.unsqueeze(0))
+
+# Creating the heatmap
+heatmap, _ = get_CAM(feature_maps, weight, idx[0])
+    
+plot_cam(x, heatmap)
+# Red "hot" areas represent where the model is focusing on more
+# if the shading isn't that great, rerun the cell to get another random sample
 
 if __name__ == "__main__":
     print()
