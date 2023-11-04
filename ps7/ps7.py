@@ -138,12 +138,141 @@ class RawCNN(nn.Module):
         x = self.fc3(x)
         return x
 
+'''
 # Test your network's forward pass
 num_samples, num_channels, width, height = 20, 1, 28, 28
 x = torch.rand(num_samples, num_channels, width, height)
 net = RawCNN(10)
 y = net(x)
 print(y.shape) # torch.Size([20, 10])
+'''
+
+
+class DropoutCNN(nn.Module):
+    def __init__(self, classes, drop_prob=0.5):
+        super().__init__()
+        """
+        classes: integer that corresponds to the number of classes for MNIST
+        drop_prob: probability of dropping a node in the neural network
+        """
+        
+        # YOUR CODE HERE
+        self.conv1 = nn.Conv2d(1, 32, 3)
+        self.mp1 = nn.MaxPool2d(2, 2)
+        self.lrelu1 = nn.LeakyReLU(0.1)
+        self.do1 = nn.Dropout(drop_prob)
+        self.conv2 = nn.Conv2d(32, 64, 3)
+        self.mp2 = nn.MaxPool2d(2, 2)
+        self.lrelu2 = nn.LeakyReLU(0.1)
+        self.do2 = nn.Dropout(drop_prob)
+        self.fc1 = nn.Linear(64 * 5 * 5, 256)
+        self.lrelu3 = nn.LeakyReLU(0.1)
+        self.do3 = nn.Dropout(drop_prob)
+        self.fc2 = nn.Linear(256, 128)
+        self.lrelu4 = nn.LeakyReLU(0.1)
+        self.fc3 = nn.Linear(128, classes)
+        
+    def forward(self, x):
+        # YOUR CODE HERE
+        x = self.conv1(x)
+        x = self.mp1(x)
+        x = self.lrelu1(x)
+        x = self.do1(x)
+        x = self.conv2(x)
+        x = self.mp2(x)
+        x = self.lrelu2(x)
+        x = self.do2(x)
+
+        x = x.view(-1, 64*5*5) # Flattening – do not remove
+
+        # YOUR CODE HERE
+        x = self.fc1(x)
+        x = self.lrelu3(x)
+        x = self.do3(x)
+        x = self.fc2(x)
+        x = self.lrelu4(x)
+        x = self.fc3(x)
+        return x
+
+# Test your network's forward pass
+num_samples, num_channels, width, height = 20, 1, 28, 28
+x = torch.rand(num_samples, num_channels, width, height)
+net = DropoutCNN(10)
+y = net(x)
+print(y.shape) # torch.Size([20, 10])
+
+%%time 
+# do not remove the above line
+
+def train_model(loader, model):
+    """
+    PARAMS
+    loader: the data loader used to generate training batches
+    model: the model to train
+  
+    RETURNS
+        the final trained model 
+    """
+
+    """
+    YOUR CODE HERE
+    
+    - create the loss and optimizer
+    """
+    epoch_losses = []
+    for i in range(10):
+        epoch_loss = # YOUR CODE HERE
+        
+        for idx, data in enumerate(loader):
+            x, y = data
+
+            """
+            YOUR CODE HERE
+            
+            - reset the optimizer
+            - perform forward pass
+            - compute loss
+            - perform backward pass
+            """
+
+            # COMPUTE STATS
+            epoch_loss += # YOUR CODE HERE
+
+        epoch_loss = epoch_loss / len(loader)
+        epoch_losses.append(epoch_loss)
+        print ("Epoch: {}, Loss: {}".format(i, epoch_loss))
+        
+
+    # YOUR CODE HERE
+
+vanilla_model, losses = train_model(train_loader, RawCNN(10))
+do_model, losses = train_model(train_loader, DropoutCNN(10))
+
+# do not remove – nothing to code here
+# run this cell before moving on
+
+with torch.no_grad():
+    vanilla_model.eval()
+    for i, data in enumerate(test_loader):
+        x, y = data
+        pred_vanilla = vanilla_model(x)
+        acc = get_accuracy(pred_vanilla, y)
+        print(f"vanilla acc: {acc}")
+        
+    do_model.eval()
+    for i, data in enumerate(test_loader):
+        x, y = data
+        pred_do = do_model(x)
+        acc = get_accuracy(pred_do, y)
+        print(f"drop-out (0.5) acc: {acc}")
+        
+"""
+The network with Dropout might under- or outperform the network without
+Dropout. However, in terms of generalisation, we are assured that the Dropout
+network will not overfit – that's the guarantee of Dropout.
+
+A very nifty trick indeed!
+"""
 
 if __name__ == "__main__":
     print()
