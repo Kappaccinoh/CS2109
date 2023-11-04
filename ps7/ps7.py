@@ -257,6 +257,7 @@ def train_model(loader, model):
     # YOUR CODE HERE
     return model, epoch_losses
 
+'''
 vanilla_model, losses = train_model(train_loader, RawCNN(10))
 do_model, losses = train_model(train_loader, DropoutCNN(10))
 
@@ -286,5 +287,79 @@ network will not overfit – that's the guarantee of Dropout.
 A very nifty trick indeed!
 """
 
+
+# %%time 
+# do not remove – nothing to code here
+# run this before moving on
+
+do10_model, do10_losses = train_model(train_loader, DropoutCNN(10, 0.10))
+do95_model, do95_losses = train_model(train_loader, DropoutCNN(10, 0.95))
+
+# do not remove – nothing to code here
+# run this cell before moving on
+
+with torch.no_grad():
+    do10_model.eval()
+    for i, data in enumerate(test_loader):
+        x, y = data
+        pred_do = do10_model(x)
+        acc = get_accuracy(pred_do, y)
+        print(acc)
+
+    do95_model.eval()
+    for i, data in enumerate(test_loader):
+        x, y = data
+        pred_do = do95_model(x)
+        acc = get_accuracy(pred_do, y)
+        print(acc)
+
+from sklearn.metrics import confusion_matrix
+
+with torch.no_grad():
+    vanilla_model.eval()
+    for i, data in enumerate(test_loader):
+        x, y = data
+        pred_vanilla = vanilla_model(x)
+        acc = get_accuracy(pred_vanilla, y)
+        print(f"vanilla acc: {acc}")
+        
+    do_model.eval()
+    for i, data in enumerate(test_loader):
+        x, y = data
+        pred_do = do_model(x)
+        acc = get_accuracy(pred_do, y)
+        print(f"drop-out (0.5) acc: {acc}")
+
+cm = confusion_matrix(mnist_test.targets, pred_vanilla.argmax(dim=1))
+plt.figure(figsize=(10,7))
+plt.title('Confusion Matrix for vanilla_model')
+# np.fill_diagonal(cm, 0) # you can zero-out the diagonal to highlight the errors better
+sns.heatmap(cm, annot=True, cmap='Blues', fmt='g')
+# print(cm) # if seaborn does not work, you can always print out the array
+    
+cm = confusion_matrix(mnist_test.targets, pred_do.argmax(dim=1))
+plt.figure(figsize=(10,7))
+plt.title('Confusion Matrix for do_model')
+# np.fill_diagonal(cm, 0) # you can zero-out the diagonal to highlight the errors better
+sns.heatmap(cm, annot=True, cmap='Blues', fmt='g')
+# print(cm) # if seaborn does not work, you can always print out the array
+
+plt.show()
+'''
+
 if __name__ == "__main__":
-    print()
+    vanilla_model, losses = train_model(train_loader, RawCNN(10))
+    vanilla_model_scripted = torch.jit.script(vanilla_model)
+    vanilla_model_scripted.save('vanilla_model')
+
+    do_model, losses = train_model(train_loader, DropoutCNN(10))
+    do_model_scripted = torch.jit.script(do_model)
+    do_model_scripted.save('do_model')
+
+    do10_model, do10_losses = train_model(train_loader, DropoutCNN(10, 0.10))
+    do10_model_scripted = torch.jit.script(do10_model)
+    do10_model_scripted.save('do10_model')
+
+    do95_model, do95_losses = train_model(train_loader, DropoutCNN(10, 0.95))
+    do95_model_scripted = torch.jit.script(do95_model)
+    do95_model_scripted.save('do95_model')
