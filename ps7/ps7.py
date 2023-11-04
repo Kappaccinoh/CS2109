@@ -201,7 +201,7 @@ net = DropoutCNN(10)
 y = net(x)
 print(y.shape) # torch.Size([20, 10])
 
-%%time 
+# %%time 
 # do not remove the above line
 
 def train_model(loader, model):
@@ -219,9 +219,13 @@ def train_model(loader, model):
     
     - create the loss and optimizer
     """
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters())
+
     epoch_losses = []
     for i in range(10):
-        epoch_loss = # YOUR CODE HERE
+        epoch_loss = 0.0
         
         for idx, data in enumerate(loader):
             x, y = data
@@ -235,8 +239,15 @@ def train_model(loader, model):
             - perform backward pass
             """
 
+            optimizer.zero_grad()
+
+            outputs = model(x)
+            loss = criterion(outputs, y)
+            loss.backward()
+            optimizer.step()
+
             # COMPUTE STATS
-            epoch_loss += # YOUR CODE HERE
+            epoch_loss += loss.item()
 
         epoch_loss = epoch_loss / len(loader)
         epoch_losses.append(epoch_loss)
@@ -244,6 +255,7 @@ def train_model(loader, model):
         
 
     # YOUR CODE HERE
+    return model, epoch_losses
 
 vanilla_model, losses = train_model(train_loader, RawCNN(10))
 do_model, losses = train_model(train_loader, DropoutCNN(10))
