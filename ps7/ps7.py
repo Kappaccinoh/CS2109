@@ -257,9 +257,12 @@ def train_model(loader, model):
     # YOUR CODE HERE
     return model, epoch_losses
 
-'''
-vanilla_model, losses = train_model(train_loader, RawCNN(10))
-do_model, losses = train_model(train_loader, DropoutCNN(10))
+
+# vanilla_model, losses = train_model(train_loader, RawCNN(10))
+# do_model, losses = train_model(train_loader, DropoutCNN(10))
+vanilla_model = torch.jit.load('vanilla_model')
+
+do_model = torch.jit.load('do_model')
 
 # do not remove – nothing to code here
 # run this cell before moving on
@@ -287,13 +290,15 @@ network will not overfit – that's the guarantee of Dropout.
 A very nifty trick indeed!
 """
 
-
+'''
 # %%time 
 # do not remove – nothing to code here
 # run this before moving on
 
-do10_model, do10_losses = train_model(train_loader, DropoutCNN(10, 0.10))
-do95_model, do95_losses = train_model(train_loader, DropoutCNN(10, 0.95))
+# do10_model, do10_losses = train_model(train_loader, DropoutCNN(10, 0.10))
+# do95_model, do95_losses = train_model(train_loader, DropoutCNN(10, 0.95))
+do10_model = torch.jit.load('do10_model')
+do95_model = torch.jit.load('do95_model')
 
 # do not remove – nothing to code here
 # run this cell before moving on
@@ -347,19 +352,71 @@ sns.heatmap(cm, annot=True, cmap='Blues', fmt='g')
 plt.show()
 '''
 
+from sklearn.metrics import f1_score, precision_score, recall_score
+
+print(f1_score(pred_do.argmax(dim=1), mnist_test.targets, average='macro'))
+print(precision_score(pred_do.argmax(dim=1), mnist_test.targets, average='macro'))
+print(recall_score(pred_do.argmax(dim=1), mnist_test.targets, average='macro'))
+
+
+cifar_train = datasets.CIFAR10("./", train=True, download=True, transform=transforms.ToTensor())
+cifar_train_loader = torch.utils.data.DataLoader(cifar_train, batch_size=128, shuffle=True)
+
+train_features, train_labels = next(iter(cifar_train_loader))
+img = train_features[0]
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10,7))
+transform = transforms.Compose([transforms.RandomHorizontalFlip()
+                                # YOUR CODE HERE
+                                ]) # add in your own transformations to test
+tensor_img = transform(img)
+ax1.imshow(img.permute(1,2,0))
+ax1.axis("off")
+ax1.set_title("Before Transformation")
+ax2.imshow(tensor_img.permute(1, 2, 0))
+ax2.axis("off")
+ax2.set_title("After Transformation")
+plt.show()
+
+# pick your data augmentations here
+def get_augmentations():
+    T = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.RandomHorizontalFlip(p=0.5),  
+        transforms.RandomVerticalFlip(p=0.5),
+        transforms.RandomRotation(degrees=30),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
+    ])
+    
+    return T
+
+'''
+Rationale Behind Chosen Augmentaions
+
+RandomHorizontal/VerticalFlip - In this case I want to generalise the orientation of the object since it doesnt affect the label outcome. This will create more variations in the dataset and make it more generalisable.
+RandomRotation - Again makes the model become more robust since as the images are rotated by a random angle.
+ColourJitter - Makes the model more generalisable to changes in lighting conditions, which I vary using brightness/contrast/saturation/hue
+'''
+
+# do not remove this cell
+# run this before moving on
+
+T = get_augmentations()
+
+cifar_train = datasets.CIFAR10("./", train=True, download=True, transform=T)
+cifar_test = datasets.CIFAR10("./", train=False, download=True, transform=T)
+
+"""
+if you feel your computer can't handle too much data, you can reduce the batch
+size to 64 or 32 accordingly, but it will make training slower. 
+
+We recommend sticking to 128 but dochoose an appropriate batch size that your
+computer can manage. The training phase tends to require quite a bit of memory.
+
+CIFAR-10 images have dimensions 3x32x32, while MNIST is 1x28x28
+"""
+cifar_train_loader = torch.utils.data.DataLoader(cifar_train, batch_size=128, shuffle=True)
+cifar_test_loader = torch.utils.data.DataLoader(cifar_test, batch_size=10000)
+
 if __name__ == "__main__":
-    vanilla_model, losses = train_model(train_loader, RawCNN(10))
-    vanilla_model_scripted = torch.jit.script(vanilla_model)
-    vanilla_model_scripted.save('vanilla_model')
-
-    do_model, losses = train_model(train_loader, DropoutCNN(10))
-    do_model_scripted = torch.jit.script(do_model)
-    do_model_scripted.save('do_model')
-
-    do10_model, do10_losses = train_model(train_loader, DropoutCNN(10, 0.10))
-    do10_model_scripted = torch.jit.script(do10_model)
-    do10_model_scripted.save('do10_model')
-
-    do95_model, do95_losses = train_model(train_loader, DropoutCNN(10, 0.95))
-    do95_model_scripted = torch.jit.script(do95_model)
-    do95_model_scripted.save('do95_model')
+    print()
