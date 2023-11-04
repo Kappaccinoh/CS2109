@@ -87,6 +87,63 @@ def get_accuracy(scores, labels):
     correct = (predicted == labels).sum().item()   
     return correct / scores.size(0)
 
+'''
+# no need to code
+# run this before moving on
+
+train_features, train_labels = next(iter(train_loader))
+print(f"Feature batch shape: {train_features.size()}")
+print(f"Labels batch shape: {train_labels.size()}")
+img = train_features[0].squeeze()
+label = train_labels[0]
+plt.imshow(img, cmap="gray")
+plt.axis("off")
+plt.show()
+print(f"Label: {label}")
+'''
+
+class RawCNN(nn.Module):
+    def __init__(self, classes):
+        super().__init__()
+        """
+        classes: integer that corresponds to the number of classes for MNIST
+        """
+        self.conv1 = nn.Conv2d(1, 32, 3)
+        self.mp1 = nn.MaxPool2d(2, 2)
+        self.lrelu1 = nn.LeakyReLU(0.1)
+        self.conv2 = nn.Conv2d(32, 64, 3)
+        self.mp2 = nn.MaxPool2d(2, 2)
+        self.lrelu2 = nn.LeakyReLU(0.1)
+        self.fc1 = nn.Linear(64 * 5 * 5, 256)
+        self.lrelu3 = nn.LeakyReLU(0.1)
+        self.fc2 = nn.Linear(256, 128)
+        self.lrelu4 = nn.LeakyReLU(0.1)
+        self.fc3 = nn.Linear(128, classes)
+        
+    def forward(self, x):
+        # YOUR CODE HERE     
+        x = self.conv1(x)
+        x = self.mp1(x)
+        x = self.lrelu1(x)
+        x = self.conv2(x)
+        x = self.mp2(x)
+        x = self.lrelu2(x)
+        x = x.view(-1, 64*5*5) # Flattening – do not remove this line
+
+        # YOUR CODE HERE
+        x = self.fc1(x)
+        x = self.lrelu3(x)
+        x = self.fc2(x)
+        x = self.lrelu4(x)
+        x = self.fc3(x)
+        return x
+
+# Test your network's forward pass
+num_samples, num_channels, width, height = 20, 1, 28, 28
+x = torch.rand(num_samples, num_channels, width, height)
+net = RawCNN(10)
+y = net(x)
+print(y.shape) # torch.Size([20, 10])
 
 if __name__ == "__main__":
     print()
