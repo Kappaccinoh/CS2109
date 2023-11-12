@@ -539,6 +539,50 @@ def find_kmeans_clusters_w_pca(digits, n_categories, threshold=2, n_init=5, rand
     
     return best_centroids, pca
 
+def predict_labels_kmeans_w_pca(pca, centroids, cluster_to_digit, digits):
+    '''
+    Predicts the digit labels for each digit in `digits`.
+    
+    Parameters
+    ----------
+    pca: PCA
+        The PCA model that is used when training the K-Means clustering model,
+        which produced `centroids`.
+    centroids: np.darray
+        The centroids of the clusters. Specifically, `centroids[j]` should represent
+        the `j`th cluster's centroid.
+    cluster_to_digit: np.darray
+        A 1D array such that `cluster_to_digit[j]` indicates which digit the `j`th
+        cluster represents. For example, if the 5th cluster represents the digit 0,
+        then `cluster_to_digit[5]` should evaluate to 0.
+        digits: np.darray
+        An `m * n` matrix, where `m` is the number of handwritten digits and `n` is
+        equal to 28*28. In particular, `digits[i]` represents the image
+        of the `i`th handwritten digit that is in the data set.
+    digits: np.darray
+        An `m * n` matrix, where `m` is the number of handwritten digits and `n` is
+        equal to 28*28. In particular, `digits[i]` represents the image
+        of the `i`th handwritten digit that is in the data set.
+
+    Returns
+    -------
+    A 1D np.darray `pred_labels` with `m` entries such that `pred_labels[i]`
+    returns the predicted digit label for the image that is represented by
+    `digits[i]`.
+    '''
+    # TODO: add your solution here and remove `raise NotImplementedError`
+    # no loop allowed
+    # Transform input digits using the same PCA model used during training
+    digits_pca = pca.transform(digits)
+    
+    # Assign each digit to the nearest cluster
+    cluster_assignments = np.argmin(np.linalg.norm(digits_pca[:, np.newaxis] - centroids, axis=2), axis=1)
+    
+    # Map cluster labels to digit labels
+    pred_labels = np.vectorize(lambda x: cluster_to_digit[x])(cluster_assignments)
+    
+    return pred_labels
+
 if __name__ == "__main__":
     train_data = load_digits_data_train()
     validation_data = load_digits_data_validation()
