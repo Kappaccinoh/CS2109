@@ -543,34 +543,6 @@ if __name__ == "__main__":
     train_data = load_digits_data_train()
     validation_data = load_digits_data_validation()
 
-    print(train_data.shape)
-    print(validation_data[0].shape)
-    print(validation_data[1].shape)
-
     train_digits = train_data
     validation_digits = validation_data[0]
     validation_labels = validation_data[1]
-    
-    # Apply K-Means clustering on validation data using PCA
-    validation_cluster_labels, _ = k_means(PCA.transform(validation_digits), n_clusters=10, threshold=2, n_init=5, random_state=2109)
-
-    # Initialize an array to store the mapping from clusters to digits
-    cluster_w_pca_to_digit = np.zeros(10, dtype=int)
-
-    # Verify the shapes of cluster_labels and validation_labels
-    print("Cluster Labels Shape:", validation_cluster_labels.shape)
-    print("Validation Labels Shape:", validation_labels.shape)
-
-    # Map clusters to digits
-    for cluster in range(10):
-        # Get the true digit labels corresponding to the current cluster
-        true_digits_in_cluster = validation_labels[validation_cluster_labels == cluster]
-
-        # Find the most common digit in the cluster
-        most_common_digit = np.bincount(true_digits_in_cluster).argmax()
-
-        # Assign the most common digit to the current cluster
-        cluster_w_pca_to_digit[cluster] = most_common_digit
-
-    # Display the resulting mapping
-    print("Cluster to Digit Mapping:", cluster_w_pca_to_digit)
