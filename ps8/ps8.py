@@ -418,13 +418,159 @@ def compress_image(image, n_colours, threshold, n_init=1, random_state=None):
 
     return compressed_image.astype(int)
 
+def predict_labels_kmeans(centroids, cluster_to_digit, digits):
+    '''
+    Predicts the digit labels for each digit in `digits`.
+
+    Parameters
+    ----------
+    centroids: np.darray
+        The centroids of the clusters. Specifically, `centroids[j]` should represent
+        the `j`th cluster's centroid.
+    cluster_to_digit: np.darray
+        A 1D array such that `cluster_to_digit[j]` indicates which digit the `j`th
+        cluster represents. For example, if the 5th cluster represents the digit 0,
+        then `cluster_to_digit[5]` should evaluate to 0.
+    digits: np.darray
+        An `m * n` matrix, where `m` is the number of handwritten digits and `n` is
+        equal to 28*28. In particular, `digits[i]` represents the image
+        of the `i`th handwritten digit that is in the data set.
+  
+    Returns
+    -------
+    A 1D np.darray `pred_labels` with `m` entries such that `pred_labels[i]`
+    returns the predicted digit label for the image that is represented by
+    `digits[i]`.
+    '''
+    # Step 1: Assign each digit image to a cluster
+    cluster_assignments = assign_clusters(digits, centroids)
+
+    # Step 2: Map cluster assignments to digit labels using cluster_to_digit
+    pred_labels = np.vectorize(lambda cluster: cluster_to_digit[cluster])(cluster_assignments)
+
+    return pred_labels
+
+def my_pca(X, n_components):
+    '''
+    Performs PCA on X to reduce it to `n_components`, using the method
+    described in lecture but with the 'centering' of X before SVD is done.
+
+    Parameters
+    ----------
+    X: np.darray
+        An `m * n` matrix where `m` is the number of samples and `n` is the
+        number of features which each sample has. In other words, the `i`th sample
+        is given by `X[i]`.
+    n_components: int
+        No. of components that the reduced space has.
+  
+    Returns
+    -------
+    The tuple `(components, singular_values)`. Here, `components` is an
+    `n_components * n` matrix such that `components[i]` returns the `i`th
+    principal axis that has the `i`th largest singular value. In addition,
+    `singular_values` is a 1D numpy array with `n_components` entries such that
+    `singular_values[i]` returns the `i`th singular value.
+
+    Note
+    ----
+    'centering' here refers to subtracting the mean from X such that the resulting
+    X' has a mean of 0 for each feature.
+    '''
+    # TODO: add your solution here and remove `raise NotImplementedError`
+    # no loop allowed
+    # Centering the data
+    X_centered = X - np.mean(X, axis=0)
+
+    # Calculating the covariance matrix
+    covariance_matrix = (1 / X.shape[0]) * np.dot(X_centered.T, X_centered)
+
+    # Performing singular value decomposition
+    _, S, Vt = np.linalg.svd(covariance_matrix)
+
+    # Extracting the top n_components principal components
+    components = Vt[:n_components]
+
+    # Calculating singular values
+    singular_values = S[:n_components]
+
+    return components, singular_values
+
+def find_kmeans_clusters_w_pca(digits, n_categories, threshold=2, n_init=5, random_state=2109, n_components=70):
+    """
+    Finds the centroids of the `n_categories` clusters given `digits` when PCA
+    is used to reduce the dimensionality of each image.
+
+    Parameters
+    ----------
+    digits: np.ndarray
+        An `m * n` matrix, where `m` is the number of handwritten digits and `n` is
+        equal to 28*28. In particular, `digits[i]` represents the image of the `i`th
+        handwritten digit.
+    n_categories: int
+        The number of distinct digits.
+    threshold: double
+        Threshold that determines when the K-means algorithm should terminate. This
+        should be used with `k_means`.
+    n_init: int
+        The number of times to run the K-means algorithm before picking the best
+        cluster. This should be used with `k_means`.
+    random_state: int or `None`
+        Used to make the K-means and PCA deterministic, if specified.
+    n_components: int
+        The dimension to which each sample point is reduced, using PCA.
+
+    Returns
+    -------
+    centroids: np.ndarray
+        An `n_categories * n_components` matrix, where `centroids[j]` is
+        the centroid of the `j`th cluster.
+    pca_model: sklearn.decomposition.PCA
+        The PCA model that is used to reduce the dimension of each image.
+    """
+    # Initialize PCA with the specified number of components and random state
+    pca = PCA(n_components=n_components, random_state=random_state)
+    
+    # Fit and transform the data using PCA
+    digits_pca = pca.fit_transform(digits)
+    
+    # Use K-Means clustering on the transformed data
+    best_labels, best_centroids = k_means(digits_pca, n_clusters=n_categories, threshold=threshold, n_init=n_init, random_state=random_state)
+    
+    return best_centroids, pca
 
 if __name__ == "__main__":
-    # Public test case 1
-    X_111 = np.arange(20).reshape((5, 4))
-    labels_111 = assign_clusters(X_111, np.copy(X_111))
+    train_data = load_digits_data_train()
+    validation_data = load_digits_data_validation()
 
-    assert np.issubdtype(labels_111.dtype, int)
+    print(train_data.shape)
+    print(validation_data[0].shape)
+    print(validation_data[1].shape)
 
-    # Public test case 2
-    assert np.all(labels_111 == np.arange(5))
+    train_digits = train_data
+    validation_digits = validation_data[0]
+    validation_labels = validation_data[1]
+    
+    # Apply K-Means clustering on validation data using PCA
+    validation_cluster_labels, _ = k_means(PCA.transform(validation_digits), n_clusters=10, threshold=2, n_init=5, random_state=2109)
+
+    # Initialize an array to store the mapping from clusters to digits
+    cluster_w_pca_to_digit = np.zeros(10, dtype=int)
+
+    # Verify the shapes of cluster_labels and validation_labels
+    print("Cluster Labels Shape:", validation_cluster_labels.shape)
+    print("Validation Labels Shape:", validation_labels.shape)
+
+    # Map clusters to digits
+    for cluster in range(10):
+        # Get the true digit labels corresponding to the current cluster
+        true_digits_in_cluster = validation_labels[validation_cluster_labels == cluster]
+
+        # Find the most common digit in the cluster
+        most_common_digit = np.bincount(true_digits_in_cluster).argmax()
+
+        # Assign the most common digit to the current cluster
+        cluster_w_pca_to_digit[cluster] = most_common_digit
+
+    # Display the resulting mapping
+    print("Cluster to Digit Mapping:", cluster_w_pca_to_digit)
